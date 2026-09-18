@@ -4,34 +4,37 @@ import { ArrowRight, Check, ShieldCheck, Volume2, VolumeX } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 import StitchAppHeader from '../../components/StitchAppHeader'
 
+import { playLanguageAudio, stopLanguageAudio } from '../../services/audioTtsService'
+
 export default function ConsentScreen() {
   const navigate = useNavigate()
-  const { t, speechLocale } = useLanguage()
+  const { lang, t } = useLanguage()
   const [agreed, setAgreed] = useState(false)
   const [speaking, setSpeaking] = useState(false)
   const [options, setOptions] = useState({ historyCollection: true, documentOCR: true, abdmSync: false })
 
-  useEffect(() => () => window.speechSynthesis?.cancel(), [])
+  useEffect(() => () => stopLanguageAudio(), [])
 
   const toggleSpeech = () => {
-    if (!('speechSynthesis' in window)) return
     if (speaking) {
-      window.speechSynthesis.cancel()
+      stopLanguageAudio()
       setSpeaking(false)
       return
     }
-    const speech = new SpeechSynthesisUtterance(`${t('consentText')} ${t('consentDetail')}`)
-    speech.lang = speechLocale
-    speech.rate = 0.88
-    speech.onend = () => setSpeaking(false)
-    speech.onerror = () => setSpeaking(false)
+    const textToSpeak = `${t('consentText', '')} ${t('consentDetail', '')}`.trim()
     setSpeaking(true)
-    window.speechSynthesis.speak(speech)
+    playLanguageAudio(
+      textToSpeak,
+      lang,
+      () => setSpeaking(false),
+      () => setSpeaking(false)
+    )
   }
 
   const toggleOption = (key) => setOptions((current) => ({ ...current, [key]: !current[key] }))
 
   const continueJourney = () => {
+    stopLanguageAudio()
     if (!agreed) return
     localStorage.setItem('arogya_consent', JSON.stringify({ grantedAt: new Date().toISOString(), options }))
     navigate('/patient')

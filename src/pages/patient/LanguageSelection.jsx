@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight, Check, Volume2 } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 import StitchAppHeader from '../../components/StitchAppHeader'
+import { playLanguageAudio, stopLanguageAudio } from '../../services/audioTtsService'
 
 const GREETINGS = {
   en: 'Hello. You can use ArogyaDarpan in English.',
@@ -22,17 +23,24 @@ export default function LanguageSelection() {
   const navigate = useNavigate()
   const [speaking, setSpeaking] = useState(null)
 
+  useEffect(() => {
+    return () => stopLanguageAudio()
+  }, [])
+
   const preview = (event, item) => {
     event.stopPropagation()
-    if (!('speechSynthesis' in window)) return
-    window.speechSynthesis.cancel()
-    const speech = new SpeechSynthesisUtterance(GREETINGS[item.id] || GREETINGS.en)
-    speech.lang = item.speechLocale
-    speech.rate = 0.9
-    speech.onend = () => setSpeaking(null)
-    speech.onerror = () => setSpeaking(null)
+    if (speaking === item.id) {
+      stopLanguageAudio()
+      setSpeaking(null)
+      return
+    }
     setSpeaking(item.id)
-    window.speechSynthesis.speak(speech)
+    playLanguageAudio(
+      GREETINGS[item.id] || GREETINGS.en,
+      item.id,
+      () => setSpeaking(null),
+      () => setSpeaking(null)
+    )
   }
 
   return (
