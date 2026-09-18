@@ -1,0 +1,14 @@
+const supplementalTranslations = {
+  en: { ayush: 'AYUSH', endSession: 'End session', endSessionConfirm: 'Are you sure you want to end this session? Unsaved answers will be cleared.', sessionTimeoutTitle: 'Are you still there?', sessionTimeoutSub: 'Your session will reset due to inactivity in:', stayLoggedIn: "I'm still here" },
+  hi: { ayush: 'आयुष', endSession: 'सत्र समाप्त करें', endSessionConfirm: 'क्या आप यह सत्र समाप्त करना चाहते हैं? सहेजे नहीं गए उत्तर मिट जाएंगे।', sessionTimeoutTitle: 'क्या आप अभी भी यहाँ हैं?', sessionTimeoutSub: 'निष्क्रियता के कारण आपका सत्र इतने समय में रीसेट होगा:', stayLoggedIn: 'मैं अभी यहाँ हूँ' },
+  bn: { ayush: 'আয়ুষ', endSession: 'সেশন শেষ করুন', endSessionConfirm: 'আপনি কি এই সেশন শেষ করতে চান? অসংরক্ষিত উত্তর মুছে যাবে।', sessionTimeoutTitle: 'আপনি কি এখনও আছেন?', sessionTimeoutSub: 'নিষ্ক্রিয়তার কারণে সেশন রিসেট হবে:', stayLoggedIn: 'আমি এখনও আছি' },
+  ta: { ayush: 'ஆயுஷ்', endSession: 'அமர்வை முடிக்கவும்', endSessionConfirm: 'இந்த அமர்வை முடிக்க வேண்டுமா? சேமிக்காத பதில்கள் அழிக்கப்படும்.', sessionTimeoutTitle: 'நீங்கள் இன்னும் இருக்கிறீர்களா?', sessionTimeoutSub: 'செயல்பாடின்மையால் அமர்வு மீட்டமைக்கப்படும் நேரம்:', stayLoggedIn: 'நான் இங்கே இருக்கிறேன்' },
+  te: { ayush: 'ఆయుష్', endSession: 'సెషన్ ముగించండి', endSessionConfirm: 'ఈ సెషన్ ముగించాలా? సేవ్ చేయని సమాధానాలు తొలగిపోతాయి.', sessionTimeoutTitle: 'మీరు ఇంకా ఉన్నారా?', sessionTimeoutSub: 'నిష్క్రియత కారణంగా సెషన్ రీసెట్ అవుతుంది:', stayLoggedIn: 'నేను ఇక్కడే ఉన్నాను' },
+  mr: { ayush: 'आयुष', endSession: 'सत्र समाप्त करा', endSessionConfirm: 'हे सत्र समाप्त करायचे आहे का? जतन न केलेली उत्तरे मिटतील.', sessionTimeoutTitle: 'तुम्ही अजून येथे आहात का?', sessionTimeoutSub: 'निष्क्रियतेमुळे सत्र इतक्या वेळात रीसेट होईल:', stayLoggedIn: 'मी अजून येथे आहे' },
+  gu: { ayush: 'આયુષ', endSession: 'સત્ર સમાપ્ત કરો', endSessionConfirm: 'શું આ સત્ર સમાપ્ત કરવું છે? સાચવ્યા વગરના જવાબો દૂર થશે.', sessionTimeoutTitle: 'શું તમે હજુ અહીં છો?', sessionTimeoutSub: 'નિષ્ક્રિયતાને કારણે સત્ર રીસેટ થશે:', stayLoggedIn: 'હું હજુ અહીં છું' },
+  kn: { ayush: 'ಆಯುಷ್', endSession: 'ಸೆಷನ್ ಮುಗಿಸಿ', endSessionConfirm: 'ಈ ಸೆಷನ್ ಮುಗಿಸಬೇಕೇ? ಉಳಿಸದ ಉತ್ತರಗಳು ಅಳಿಸಲಾಗುತ್ತವೆ.', sessionTimeoutTitle: 'ನೀವು ಇನ್ನೂ ಇದ್ದೀರಾ?', sessionTimeoutSub: 'ನಿಷ್ಕ್ರಿಯತೆಯಿಂದ ಸೆಷನ್ ಮರುಹೊಂದುವ ಸಮಯ:', stayLoggedIn: 'ನಾನು ಇನ್ನೂ ಇಲ್ಲಿದ್ದೇನೆ' },
+  pa: { ayush: 'ਆਯੁਸ਼', endSession: 'ਸੈਸ਼ਨ ਖਤਮ ਕਰੋ', endSessionConfirm: 'ਕੀ ਤੁਸੀਂ ਇਹ ਸੈਸ਼ਨ ਖਤਮ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ? ਨਾ ਸੰਭਾਲੇ ਜਵਾਬ ਮਿਟ ਜਾਣਗੇ।', sessionTimeoutTitle: 'ਕੀ ਤੁਸੀਂ ਹਾਲੇ ਵੀ ਇੱਥੇ ਹੋ?', sessionTimeoutSub: 'ਗੈਰ-ਸਰਗਰਮੀ ਕਾਰਨ ਸੈਸ਼ਨ ਰੀਸੈਟ ਹੋਵੇਗਾ:', stayLoggedIn: 'ਮੈਂ ਹਾਲੇ ਇੱਥੇ ਹਾਂ' },
+  ml: { ayush: 'ആയുഷ്', endSession: 'സെഷൻ അവസാനിപ്പിക്കുക', endSessionConfirm: 'ഈ സെഷൻ അവസാനിപ്പിക്കണോ? സൂക്ഷിക്കാത്ത ഉത്തരങ്ങൾ മായും.', sessionTimeoutTitle: 'നിങ്ങൾ ഇപ്പോഴും ഇവിടെയുണ്ടോ?', sessionTimeoutSub: 'നിഷ്ക്രിയത കാരണം സെഷൻ പുനഃസജ്ജമാകുന്ന സമയം:', stayLoggedIn: 'ഞാൻ ഇപ്പോഴും ഇവിടെയുണ്ട്' },
+}
+
+export default supplementalTranslations

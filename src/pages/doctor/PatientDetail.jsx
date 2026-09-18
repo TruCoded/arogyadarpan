@@ -19,6 +19,7 @@ import EvidenceDrawer from '../../components/EvidenceDrawer'
 import DocumentInspectorModal from '../../components/DocumentInspectorModal'
 import DrugSafetyBanner from '../../components/DrugSafetyBanner'
 import DifferentialDiagnosisWidget from '../../components/DifferentialDiagnosisWidget'
+import LanguageSelector from '../../components/LanguageSelector'
 import { getDemoPatient } from '../../data/demoPatients'
 import { prepareFHIRBundle } from '../../services/abdmService'
 import { generateDifferentialDiagnosis } from '../../services/differentialEngine'
@@ -243,6 +244,7 @@ export default function PatientDetail() {
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            <LanguageSelector variant="compact" />
             <button
               onClick={() => setFhirModalOpen(true)}
               className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-mono font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer flex items-center gap-1.5"

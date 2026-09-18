@@ -35,7 +35,7 @@ function MobileAppController() {
   useEffect(() => {
     // Configure Native Mobile Status Bar & Splash Screen
     if (Capacitor.isNativePlatform()) {
-      StatusBar.setBackgroundColor({ color: '#00685f' }).catch(() => {})
+      StatusBar.setBackgroundColor({ color: '#174ea6' }).catch(() => {})
       StatusBar.setStyle({ style: Style.Dark }).catch(() => {})
       StatusBar.setOverlaysWebView({ overlay: false }).catch(() => {})
       CapSplashScreen.hide().catch(() => {})
@@ -70,7 +70,7 @@ function AnimatedRoutes() {
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           {/* App Launch Splash & Landing */}
-          <Route path="/" element={<SplashScreen />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/landing" element={<LandingPage />} />
           <Route path="/demo" element={<DemoPage />} />
           <Route path="/kiosk" element={<KioskView />} />
@@ -125,5 +125,4 @@ export default function App() {
     </LanguageProvider>
   )
 }
-
 

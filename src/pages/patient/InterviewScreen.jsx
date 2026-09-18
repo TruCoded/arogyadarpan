@@ -242,6 +242,7 @@ export default function InterviewScreen() {
   // If intake is complete, render an interactive summary rather than a blank or redirect screen
   if (isComplete) {
     const chiefVal = responses.find(r => r.questionId === 'chief_complaint')?.structuredValue || 'General Consultation'
+    const chiefLabel = COMPLAINT_OPTIONS.find((item) => item.id === chiefVal)
     return (
       <BionicKioskShell
         activeTrack={mode === 'ayush' ? 'ayush' : 'modern'}
@@ -258,13 +259,13 @@ export default function InterviewScreen() {
 
           <div>
             <span className="status-chip bg-emerald-soft text-emerald font-bold mb-2">
-              Clinical Intake Completed • 100%
+              {t('intakeCompleted')} • 100%
             </span>
             <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
-              Clinical Intake Responses Saved
+              {t('responsesSaved')}
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 font-medium max-w-md mx-auto mt-1">
-              Your symptoms and clinical history have been synthesized by AI and prepared for your physician.
+              {t('responsesSavedDesc')}
             </p>
           </div>
 
@@ -272,24 +273,24 @@ export default function InterviewScreen() {
           <div className="glass-card p-4 sm:p-6 bg-white border border-slate-200/80 shadow-xs rounded-2xl text-left space-y-3">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                Intake Summary
+                {t('intakeSummary')}
               </span>
               <span className="text-xs font-bold text-cobalt font-mono">
-                {responses.length} Question{responses.length !== 1 ? 's' : ''} Answered
+                {responses.length} {t('questionsAnswered')}
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <span className="text-slate-400 block text-[10px] font-bold uppercase">Chief Complaint</span>
+                <span className="text-slate-400 block text-[10px] font-bold uppercase">{t('chiefComplaint')}</span>
                 <span className="font-bold text-slate-900 text-sm mt-0.5 block capitalize">
-                  {String(chiefVal).replace(/_/g, ' ')}
+                  {chiefLabel ? getLocalizedOption(chiefLabel, lang) : String(chiefVal).replace(/_/g, ' ')}
                 </span>
               </div>
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <span className="text-slate-400 block text-[10px] font-bold uppercase">Triage Status</span>
+                <span className="text-slate-400 block text-[10px] font-bold uppercase">{t('triageStatus')}</span>
                 <span className="font-bold text-emerald text-sm mt-0.5 block">
-                  {triageData?.priority === 'critical' ? '⚠️ Priority Review Required' : '✓ Standard Triage Ready'}
+                  {triageData?.priority === 'critical' ? `⚠️ ${t('priorityReviewRequired')}` : `✓ ${t('standardTriageReady')}`}
                 </span>
               </div>
             </div>
@@ -305,7 +306,7 @@ export default function InterviewScreen() {
               className="btn-bionic-outline w-full sm:w-auto px-6 py-3.5 rounded-full text-xs sm:text-sm font-bold shadow-xs flex items-center justify-center gap-2 cursor-pointer"
             >
               <RefreshCw className="size-4" />
-              <span>Retake / Edit Intake</span>
+              <span>{t('retakeIntake')}</span>
             </button>
 
             <button
@@ -313,7 +314,7 @@ export default function InterviewScreen() {
               onClick={() => navigate('/patient/documents')}
               className="btn-bionic w-full sm:w-auto px-7 py-3.5 rounded-full text-white text-xs sm:text-sm font-bold shadow-cobalt flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>Continue to OCR Scanner</span>
+              <span>{t('continueDocuments')}</span>
               <ArrowRight className="size-4" />
             </button>
           </div>
@@ -334,16 +335,16 @@ export default function InterviewScreen() {
             <Activity className="size-8" />
           </div>
           <h2 className="font-heading font-bold text-lg text-slate-900">
-            Intake Session
+            {t('intakeSession')}
           </h2>
           <p className="text-xs text-slate-500">
-            Ready to start your clinical intake interview.
+            {t('readyStart')}
           </p>
           <button
             onClick={() => resetInterview()}
             className="btn-bionic px-6 py-3 rounded-full text-white text-xs font-bold shadow-cobalt mx-auto"
           >
-            Start Intake Questionnaire
+            {t('startQuestionnaire')}
           </button>
         </div>
       </BionicKioskShell>
@@ -366,11 +367,14 @@ export default function InterviewScreen() {
     }
   }
 
+  const optionsNeedTextInput = ['single_select', 'multi_select'].includes(currentQuestion.type) && !['en', 'hi'].includes(lang)
+
   const handleSubmitCurrent = () => {
     let value = ''
     if (currentQuestion.type === 'text') value = textInput
     else if (currentQuestion.type === 'number') value = parseInt(numberInput, 10) || numberInput
-    else if (currentQuestion.type === 'multi_select') value = selectedOptions
+    else if (currentQuestion.type === 'multi_select') value = optionsNeedTextInput ? textInput : selectedOptions
+    else if (currentQuestion.type === 'single_select') value = textInput
     else if (currentQuestion.type === 'dropdown' || currentQuestion.type === 'select') value = dropdownValue
     else if (currentQuestion.type === 'date') value = dateValue
 
@@ -396,40 +400,37 @@ export default function InterviewScreen() {
       activeTrack={mode === 'ayush' ? 'ayush' : 'modern'}
       onTrackChange={(newTrack) => setMode(newTrack === 'ayush' ? 'ayush' : 'allopathic')}
     >
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-12 select-none">
+      <div className="mx-auto grid max-w-3xl grid-cols-1 gap-5 select-none">
         {/* ── Left Column: Clinical Questionnaire (7 cols) ── */}
-        <section className="xl:col-span-7 flex flex-col justify-between">
+        <section className="flex flex-col justify-between">
           <div>
             {/* Top Title & Controls */}
             <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
               <div>
-                <h1 className="font-heading text-xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900">
-                  Clinical Intake{' '}
-                  <span className="rounded-xl sm:rounded-2xl bg-lime px-2 sm:px-3 py-0.5 text-lime-ink inline-block text-lg sm:text-2xl md:text-3xl font-bold shadow-xs">
-                    Interview
-                  </span>
+                <h1 className="font-heading text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+                  {t('healthInterview', 'Health interview')}
                 </h1>
                 <p className="mt-1 text-xs text-slate-500 font-medium">
                   {mode === 'ayush'
-                    ? '🌿 AYUSH Track • Dashavidha Pariksha protocol'
-                    : '🩺 Allopathic Protocol • SOCRATES pain assessment'}
+                    ? `AYUSH • ${t('structuredHistory')}`
+                    : `${t('modernMedicine')} • ${t('structuredHistory')}`}
                 </p>
               </div>
 
               <div className="flex items-center gap-2">
-                <button
+                {lang === 'en' && <button
                   onClick={() => setShowFullForm(!showFullForm)}
                   className="glass-pill px-3 py-1.5 text-xs font-bold text-cobalt border border-slate-200 hover:bg-slate-50 transition cursor-pointer"
                 >
-                  {showFullForm ? 'Step View' : 'Full Form'}
-                </button>
+                  {showFullForm ? t('stepView') : t('fullForm')}
+                </button>}
                 <button
                   onClick={() => setIsLowLiteracy(!isLowLiteracy)}
                   className={`glass-pill px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
                     isLowLiteracy ? 'bg-amber text-slate-900' : 'text-slate-600 border border-slate-200'
                   }`}
                 >
-                  {isLowLiteracy ? '☀️ Large Font ON' : '☀️ Large Font'}
+                  {isLowLiteracy ? 'A+ ON' : 'A+'}
                 </button>
               </div>
             </div>
@@ -455,7 +456,7 @@ export default function InterviewScreen() {
                 {/* Section Badge & Question Counter */}
                 <div className="flex items-center justify-between mb-3">
                   <span className="status-chip bg-cobalt-soft text-cobalt font-bold text-[10px] sm:text-[11px]">
-                    {(currentQuestion.category || currentQuestion.section || 'QUESTION').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                    {t('question')}
                   </span>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-slate-400">
@@ -474,7 +475,7 @@ export default function InterviewScreen() {
                 <h2 className="text-base sm:text-xl md:text-2xl font-bold text-slate-900 font-heading mb-1 leading-snug">
                   {questionText}
                 </h2>
-                {(currentQuestion.hindi || currentQuestion.questionHi) && (
+                {lang === 'en' && (currentQuestion.hindi || currentQuestion.questionHi) && (
                   <p className="text-xs sm:text-sm text-slate-500 font-medium mb-5">
                     {currentQuestion.hindi || currentQuestion.questionHi}
                   </p>
@@ -484,39 +485,22 @@ export default function InterviewScreen() {
                 {currentQuestion.type === 'complaint_select' && (
                   <div className="space-y-4">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                      Touch to answer • स्पर्श करें
+                      {t('speakOrChoose', 'Choose an option')}
                     </h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                      {bionicSymptomTiles.map((tile) => (
+                      {COMPLAINT_OPTIONS.slice(0, 6).map((tile) => (
                         <button
                           key={tile.id}
                           type="button"
-                          onClick={() =>
-                            handleComplaintSelect(
-                              tile.id === 'chest'
-                                ? 'chest_pain'
-                                : tile.id === 'fever'
-                                ? 'fever'
-                                : tile.id === 'breath'
-                                ? 'breathing'
-                                : tile.id === 'headache'
-                                ? 'headache'
-                                : tile.id === 'stomach'
-                                ? 'stomach_pain'
-                                : 'cough'
-                            )
-                          }
+                          onClick={() => handleComplaintSelect(tile.id)}
                           className="glass-card tile-lift p-3 sm:p-3.5 text-left border border-slate-200/80 bg-white hover:border-cobalt transition-all cursor-pointer shadow-xs flex flex-col justify-between h-24 sm:h-28"
                         >
-                          <span className="flex size-9 items-center justify-center rounded-xl bg-cobalt-soft text-cobalt">
-                            <Activity className="size-4" />
+                          <span className="flex size-10 items-center justify-center rounded-xl bg-blue-50 text-xl shadow-xs">
+                            {tile.icon || '🩺'}
                           </span>
                           <div>
                             <span className="block text-xs sm:text-sm font-bold text-slate-900">
-                              {tile.en}
-                            </span>
-                            <span className="block text-[11px] text-slate-500 font-medium">
-                              {tile.hi}
+                              {getLocalizedOption(tile, lang)}
                             </span>
                           </div>
                         </button>
@@ -525,7 +509,7 @@ export default function InterviewScreen() {
 
                     {/* Additional Complaints */}
                     <div className="pt-2 border-t border-slate-100">
-                      <p className="text-[11px] font-bold text-slate-400 mb-2">OTHER COMPLAINTS:</p>
+                      <p className="text-[11px] font-bold text-slate-400 mb-2">{t('other', 'Other')}</p>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                         {COMPLAINT_OPTIONS.filter((c) => !['chest_pain', 'fever', 'breathing', 'headache', 'stomach_pain', 'cough'].includes(c.id)).map((opt) => (
                           <button
@@ -547,11 +531,11 @@ export default function InterviewScreen() {
                 {(currentQuestion.type === 'scale' || currentQuestion.id === 'pain_severity' || currentQuestion.id === 'socrates_severity') && (
                   <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-4">
                     <div className="flex justify-between items-center text-xs font-bold text-slate-500">
-                      <span>1 • Mild / हल्का</span>
+                      <span>1 • {t('mild')}</span>
                       <span className="text-sm font-black text-white px-3 py-1 rounded-full bg-cobalt shadow-cobalt">
                         {numberInput || '5'} / 10
                       </span>
-                      <span>10 • Worst / असहनीय</span>
+                      <span>10 • {t('worst')}</span>
                     </div>
                     <input
                       type="range"
@@ -560,7 +544,7 @@ export default function InterviewScreen() {
                       value={numberInput || 5}
                       onChange={(e) => setNumberInput(e.target.value)}
                       className="w-full accent-[var(--cobalt)] cursor-pointer h-2.5 bg-slate-200 rounded-lg"
-                      aria-label="Pain severity slider"
+                      aria-label={t('confirmSeverity')}
                     />
                     <div className="flex justify-end pt-1">
                       <Button
@@ -568,7 +552,7 @@ export default function InterviewScreen() {
                         onClick={() => handleSelectOption(String(Math.min(10, Math.max(1, parseInt(numberInput, 10) || 5))))}
                         className="bg-cobalt text-white shadow-cobalt font-bold text-xs"
                       >
-                        Confirm Severity ({Math.min(10, Math.max(1, parseInt(numberInput, 10) || 5))}/10)
+                        {t('confirmSeverity')} ({Math.min(10, Math.max(1, parseInt(numberInput, 10) || 5))}/10)
                       </Button>
                     </div>
                   </div>
@@ -595,7 +579,7 @@ export default function InterviewScreen() {
                 )}
 
                 {/* 4. SINGLE SELECT OPTIONS */}
-                {currentQuestion.type === 'single_select' && currentQuestion.options && (
+                {currentQuestion.type === 'single_select' && currentQuestion.options && !optionsNeedTextInput && (
                   <div className="space-y-2">
                     {currentQuestion.options.map((opt) => {
                       const optLabel = getLocalizedOption(opt, lang)
@@ -617,7 +601,7 @@ export default function InterviewScreen() {
                 )}
 
                 {/* 5. MULTI-SELECT OPTIONS */}
-                {currentQuestion.type === 'multi_select' && currentQuestion.options && (
+                {currentQuestion.type === 'multi_select' && currentQuestion.options && !optionsNeedTextInput && (
                   <div className="space-y-2">
                     {currentQuestion.options.map((opt) => {
                       const optLabel = getLocalizedOption(opt, lang)
@@ -657,6 +641,13 @@ export default function InterviewScreen() {
                   </div>
                 )}
 
+                {optionsNeedTextInput && (
+                  <div className="space-y-3">
+                    <textarea rows={3} value={textInput} onChange={(event) => setTextInput(event.target.value)} placeholder={t('typeAnswer')} className="w-full rounded-2xl border border-slate-200 p-3 text-sm outline-none focus:border-[#174ea6]" />
+                    <div className="flex justify-end"><Button size="md" onClick={handleSubmitCurrent} disabled={!textInput.trim()} className="bg-cobalt text-white font-bold text-xs">{t('submitAnswer')}</Button></div>
+                  </div>
+                )}
+
                 {/* 6. NUMERIC KEYPAD */}
                 {(currentQuestion.type === 'number' || currentQuestion.type === 'numeric_touch') && (
                   <div className="space-y-4">
@@ -688,7 +679,7 @@ export default function InterviewScreen() {
                       rows={3}
                       value={textInput}
                       onChange={(e) => setTextInput(e.target.value)}
-                      placeholder="Type details or speak into the microphone on the right..."
+                      placeholder={t('typeAnswer')}
                       className="w-full p-3 rounded-2xl border border-slate-200 text-xs sm:text-sm outline-none focus:border-cobalt"
                     />
                     <div className="flex justify-end">
@@ -698,7 +689,7 @@ export default function InterviewScreen() {
                         disabled={!textInput.trim()}
                         className="bg-cobalt text-white shadow-cobalt font-bold text-xs"
                       >
-                        {t('submit', 'Submit Answer')}
+                        {t('submitAnswer')}
                       </Button>
                     </div>
                   </div>
@@ -745,17 +736,14 @@ export default function InterviewScreen() {
         </section>
 
         {/* ── Right Column: Voice Assistant & Telemetry Panel (5 cols) ── */}
-        <section className="xl:col-span-5 space-y-4 flex flex-col justify-between">
+        <section className="space-y-4 flex flex-col justify-between">
           {/* Bionic Voice Assistant Card */}
           <div className="glass-card p-5 bg-white border border-slate-200/80 shadow-xs flex flex-col items-center text-center">
-            <span className="status-chip bg-cobalt-soft text-cobalt mb-2 font-bold text-[10px]">
-              AI VOICE ASSISTANT
-            </span>
             <h3 className="text-base font-bold text-slate-900 font-heading">
-              Speak in Hindi or English
+              {t('tapToSpeak', 'Tap to speak')}
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
-              Natural speech recognition with Indian code-switching support
+              {t('voiceHelper', 'Speak naturally in your selected language.')}
             </p>
 
             {/* Pulsing Microphone Waveform Component */}
@@ -781,20 +769,20 @@ export default function InterviewScreen() {
               >
                 <div className="flex items-center gap-1.5 font-bold">
                   <span className="size-2 rounded-full bg-emerald animate-ping" />
-                  <span>Voice Matched:</span>
+                  <span>{t('confirm', 'Voice matched')}:</span>
                 </div>
                 <p className="mt-0.5 text-[11px] truncate">"{voiceMatchStatus.heard}" → {voiceMatchStatus.normalized}</p>
               </motion.div>
             )}
 
             {/* Conversational Voice AI Trigger Button */}
-            <button
+            {['en', 'hi'].includes(lang) && <button
               onClick={() => setShowConversationalModal(true)}
-              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-cobalt to-cobalt-deep text-white text-xs font-bold shadow-cobalt hover:brightness-110 transition cursor-pointer flex items-center justify-center gap-1.5"
+              className="w-full py-2.5 rounded-full bg-[#174ea6] text-white text-xs font-bold hover:bg-[#123b79] transition cursor-pointer flex items-center justify-center gap-1.5"
             >
               <Zap className="size-4" />
-              <span>Free-Flow Voice Conversation</span>
-            </button>
+              <span>{t('speakOrChoose', 'Start voice conversation')}</span>
+            </button>}
           </div>
         </section>
       </div>
@@ -833,7 +821,7 @@ export default function InterviewScreen() {
                   fullWidth
                   onClick={() => setShowEndSessionConfirm(false)}
                 >
-                  Cancel
+                  {t('cancel')}
                 </Button>
                 <Button
                   variant="primary"
@@ -842,7 +830,7 @@ export default function InterviewScreen() {
                   onClick={handleEndSession}
                   className="bg-rose-600 hover:bg-rose-700 text-white"
                 >
-                  Yes, End
+                  {t('endSession')}
                 </Button>
               </div>
             </motion.div>

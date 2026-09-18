@@ -1,5 +1,8 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import translations, { t as translateHelper } from '../data/translations'
+import coreUiTranslations from '../data/coreUiTranslations'
+import journeyTranslations from '../data/journeyTranslations'
+import supplementalTranslations from '../data/supplementalTranslations'
 
 export const SUPPORTED_LANGUAGES = [
   { id: 'en', label: 'English', native: 'English', flag: '🇬🇧', speechLocale: 'en-IN', region: 'Pan-India' },
@@ -51,7 +54,16 @@ export function LanguageProvider({ children }) {
   const speechLocale = currentLanguageMeta.speechLocale || 'en-IN'
 
   const t = (key, fallback) => {
-    return translateHelper(key, lang) || fallback || key
+    const supplementalTranslation = supplementalTranslations[lang]?.[key]
+    if (supplementalTranslation) return supplementalTranslation
+    const journeyTranslation = journeyTranslations[lang]?.[key]
+    if (journeyTranslation) return journeyTranslation
+    const coreTranslation = coreUiTranslations[lang]?.[key]
+    if (coreTranslation) return coreTranslation
+    const translated = translateHelper(key, lang)
+    // translateHelper returns the key itself when no translation exists.
+    // Treat that as a miss so UI copy can use the supplied human fallback.
+    return translated === key ? (fallback || key) : translated
   }
 
   return (

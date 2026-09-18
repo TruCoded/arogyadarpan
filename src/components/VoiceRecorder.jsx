@@ -1,4 +1,5 @@
 import { Mic, MicOff, Sparkles } from 'lucide-react'
+import { useLanguage } from '../context/LanguageContext'
 
 export default function VoiceRecorder({
   isListening = false,
@@ -10,6 +11,7 @@ export default function VoiceRecorder({
   error,
   className = '',
 }) {
+  const { t } = useLanguage()
   if (!isSupported) {
     return (
       <div className={`text-center py-6 ${className}`}>
@@ -17,7 +19,7 @@ export default function VoiceRecorder({
           <MicOff className="w-7 h-7 text-slate-400" />
         </div>
         <p className="text-sm text-slate-500">
-          Voice input is not supported in this browser.
+          {t('micUnavailable')}
         </p>
       </div>
     )
@@ -32,7 +34,7 @@ export default function VoiceRecorder({
         <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-slate-100">
           <div className="flex items-center gap-1.5">
             <span className={`w-2 h-2 rounded-full ${isListening ? 'bg-red-500 animate-ping' : 'bg-teal-600'}`} />
-            <span className="font-mono text-[11px] font-bold text-slate-600">Live Voice Intake (Hindi/EN)</span>
+            <span className="font-mono text-[11px] font-bold text-slate-600">{t('tapToSpeak')}</span>
           </div>
           <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-700 font-mono text-[10px] font-bold">
             <Sparkles className="size-3" />
@@ -43,7 +45,7 @@ export default function VoiceRecorder({
           {displayText ? (
             <span>“{displayText}”</span>
           ) : (
-            <span className="text-slate-400 not-italic">“Tap mic and speak your symptoms in your own words...”</span>
+            <span className="text-slate-400 not-italic">“{t('voiceHelper')}”</span>
           )}
         </p>
         <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rotate-45 border-r border-b border-slate-200/80" />
@@ -69,7 +71,7 @@ export default function VoiceRecorder({
               : 'bg-white hover:bg-slate-50 text-teal-700 border-2 border-teal-500/30 hover:border-teal-500'
             }
           `}
-          aria-label={isListening ? 'Stop recording' : 'Start recording'}
+          aria-label={isListening ? t('stopAudio') : t('tapToSpeak')}
         >
           <Mic className={`w-8 h-8 ${isListening ? 'animate-pulse' : ''}`} />
 
@@ -87,14 +89,14 @@ export default function VoiceRecorder({
       <div className="flex items-center gap-2 mt-2">
         <span className={`w-1.5 h-1.5 rounded-full ${isListening ? 'bg-emerald-500 animate-bounce' : 'bg-slate-400'}`} />
         <span className="font-mono text-[11px] text-slate-500">
-          {isListening ? 'Listening... Tap mic to pause' : 'Tap mic to speak naturally in any dialect'}
+          {isListening ? t('listening') : t('voiceHelper')}
         </span>
       </div>
 
       {/* Error state */}
       {error === 'microphone_blocked' && (
         <p className="mt-3 text-xs text-red-600 font-semibold bg-red-50 px-3 py-1 rounded-full border border-red-200">
-          Microphone access blocked. Please enable in browser permissions.
+          {t('micUnavailable')}
         </p>
       )}
     </div>

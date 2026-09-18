@@ -130,6 +130,25 @@ html, body {
   padding: 0;
 }
 
+.simple-input {
+  width: 100%;
+  min-height: 52px;
+  border: 1px solid #cbd5e1;
+  border-radius: 1rem;
+  background: #ffffff;
+  padding: 0.875rem 1rem;
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 500;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.simple-input:focus {
+  border-color: #174ea6;
+  box-shadow: 0 0 0 4px rgba(23, 78, 166, 0.10);
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading), 'Plus Jakarta Sans', sans-serif;
   font-weight: 700;
@@ -540,6 +559,5 @@ h1, h2, h3, h4, h5, h6 {
 .tap-bounce:active {
   transform: scale(0.94);
 }
-
 
 

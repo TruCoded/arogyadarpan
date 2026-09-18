@@ -8,6 +8,8 @@ import {
 } from 'lucide-react'
 import { DEMO_PATIENTS, DEMO_DOCTOR } from '../../data/demoPatients'
 import ConnectionStatus from '../../components/ConnectionStatus'
+import LanguageSelector from '../../components/LanguageSelector'
+import { useLanguage } from '../../context/LanguageContext'
 
 const fadeIn = {
   hidden: { opacity: 0, y: 15 },
@@ -87,6 +89,7 @@ export default function DoctorDashboard() {
 
           <div className="flex items-center gap-3">
             <ConnectionStatus />
+            <LanguageSelector variant="compact" />
             <div className="h-6 w-px bg-slate-200 hidden sm:block" />
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200/70 text-xs">
               <div className="size-2 rounded-full bg-emerald animate-ping" />
@@ -272,7 +275,7 @@ export default function DoctorDashboard() {
               </div>
               <span className="text-xs text-teal-700 font-semibold flex items-center gap-1">
                 <span className="size-2 rounded-full bg-teal-500 animate-pulse" />
-                ABHA & AI Verified
+                Demo ABHA record
               </span>
             </div>
 

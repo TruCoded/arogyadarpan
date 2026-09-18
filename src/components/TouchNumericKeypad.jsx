@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Delete, Plus, Minus, Check } from 'lucide-react'
 import Button from './Button'
+import { useLanguage } from '../context/LanguageContext'
 
 /**
  * TouchNumericKeypad — Touchscreen-optimized numeric input keypad & counter stepper
@@ -15,8 +16,9 @@ export default function TouchNumericKeypad({
   step = 1,
   unit = '',
   placeholder = '0',
-  submitLabel = 'Confirm'
+  submitLabel
 }) {
+  const { t } = useLanguage()
   const [internalVal, setInternalVal] = useState(String(value ?? ''))
 
   const handleDigit = (digit) => {
@@ -116,7 +118,7 @@ export default function TouchNumericKeypad({
             onClick={handleClear}
             className="h-13 rounded-2xl bg-surface-muted text-xs font-bold text-text-secondary hover:bg-gray-200 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
           >
-            Clear
+            {t('remove')}
           </button>
           <button
             type="button"
@@ -144,7 +146,7 @@ export default function TouchNumericKeypad({
           className="mt-3 flex items-center justify-center gap-2"
         >
           <Check className="w-4 h-4 stroke-[3]" />
-          <span>{submitLabel}</span>
+          <span>{submitLabel || t('confirm')}</span>
         </Button>
       )}
     </div>

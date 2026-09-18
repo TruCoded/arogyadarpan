@@ -113,7 +113,7 @@ export default function Timeline({ events = [], className = '' }) {
         <div className="flex items-center justify-between">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-50 text-cyan-800 border border-cyan-200/80">
             <span className="material-symbols-outlined text-[14px]">history_edu</span>
-            <span className="font-mono text-[10px] font-bold tracking-wider">FHIR R4 • ABDM LIVE</span>
+            <span className="text-[10px] font-bold tracking-wider">FHIR R4 • SANDBOX DEMO</span>
           </div>
           <div className="flex items-center gap-1 text-slate-500 font-mono text-[10px] font-bold">
             <span className="w-2 h-2 rounded-full bg-[#00855b] animate-ping" />

@@ -4,7 +4,7 @@ import { Globe, ChevronDown, Check } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 
 export default function LanguageSelector({ variant = 'compact', className = '' }) {
-  const { lang, setLanguage, languages, currentLanguageMeta } = useLanguage()
+  const { lang, setLanguage, languages, currentLanguageMeta, t } = useLanguage()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef(null)
 
@@ -66,7 +66,7 @@ export default function LanguageSelector({ variant = 'compact', className = '' }
             className="absolute right-0 z-50 mt-2 w-56 rounded-2xl bg-surface-raised border border-border-light shadow-xl py-2 backdrop-blur-md"
           >
             <div className="px-3 py-1.5 border-b border-border-light/60 mb-1">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Select Language / भाषा चुनें</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">{t('chooseLanguage', 'Choose your language')}</p>
             </div>
             <div className="max-h-64 overflow-y-auto px-1 space-y-0.5 custom-scrollbar">
               {languages.map((l) => {
@@ -88,7 +88,6 @@ export default function LanguageSelector({ variant = 'compact', className = '' }
                       <span className="text-base">{l.flag}</span>
                       <div>
                         <p className="leading-tight">{l.native}</p>
-                        <p className="text-[10px] text-text-muted font-normal">{l.label} • {l.region}</p>
                       </div>
                     </div>
                     {isSelected && <Check className="w-3.5 h-3.5 text-primary-600 shrink-0" />}
