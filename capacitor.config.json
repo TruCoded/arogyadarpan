@@ -1,0 +1,20 @@
+{
+  "appId": "com.arogyadarpan.app",
+  "appName": "ArogyaDarpan",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#0d9488",
+      "showSpinner": false,
+      "androidSplashResourceName": "splash"
+    },
+    "StatusBar": {
+      "style": "LIGHT",
+      "backgroundColor": "#0d9488"
+    }
+  }
+}

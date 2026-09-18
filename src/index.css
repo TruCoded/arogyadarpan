@@ -1,0 +1,545 @@
+@import "tailwindcss";
+
+/* ============================
+   ArogyaDarpan Design System (Tailwind v4 Theme)
+   ============================ */
+
+@theme {
+  --font-heading: 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-metrics: 'JetBrains Mono', monospace;
+
+  /* Primary - Calm Teal & Stitch Tokens */
+  --color-primary-teal: #0d9488;
+  --color-primary-teal-hover: #0f766e;
+  --color-primary-teal-glow: rgba(13, 148, 136, 0.22);
+  --color-vitality-emerald: #10b981;
+  --color-vitality-emerald-soft: rgba(16, 185, 129, 0.12);
+  --color-electric-cyan: #06b6d4;
+  --color-electric-cyan-soft: rgba(6, 182, 212, 0.14);
+  --color-redflag-coral: #ef4444;
+  --color-redflag-coral-soft: rgba(239, 68, 68, 0.12);
+  --color-alert-amber: #f59e0b;
+  --color-alert-amber-soft: rgba(245, 158, 11, 0.12);
+
+  /* Stitch Glass & Surfaces */
+  --color-surface-glass: rgba(255, 255, 255, 0.82);
+  --color-border-glass: rgba(255, 255, 255, 0.60);
+  --color-border-subtle: #e2e8f0;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f2f4f6;
+  --color-surface-container: #eceef0;
+  --color-surface-container-high: #e6e8ea;
+  --color-surface-container-highest: #e0e3e5;
+  --color-on-surface: #191c1e;
+  --color-on-surface-variant: #3d4947;
+  --color-tertiary: #006947;
+  --color-tertiary-container: #00855b;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #f5fff6;
+  --color-secondary-container: #57dffe;
+  --color-on-secondary-container: #006172;
+  --color-primary-container: #008378;
+  --color-on-primary-container: #f4fffc;
+  --color-outline-variant: #bcc9c6;
+  --color-outline: #6d7a77;
+
+  --color-primary-50: #edfaf8;
+  --color-primary-100: #d2f3ee;
+  --color-primary-200: #a8e8df;
+  --color-primary-300: #71d5c8;
+  --color-primary-400: #3dbdae;
+  --color-primary-500: #22a699;
+  --color-primary-600: #198578;
+  --color-primary-700: #186a62;
+  --color-primary-800: #185550;
+  --color-primary-900: #184743;
+
+  /* Surfaces */
+  --color-surface: #f8fafb;
+  --color-surface-raised: #ffffff;
+  --color-surface-muted: #f1f4f6;
+
+  /* Borders */
+  --color-border-light: #e5e9ec;
+
+  /* Text Colors */
+  --color-text-primary: #1a2332;
+  --color-text-secondary: #5a6577;
+  --color-text-muted: #8f99a8;
+
+  /* Semantic Colors */
+  --color-success: #10b981;
+  --color-success-light: #d1fae5;
+  --color-warning: #f59e0b;
+  --color-warning-light: #fef3c7;
+  --color-critical: #ef4444;
+  --color-critical-light: #fee2e2;
+  --color-info: #3b82f6;
+  --color-info-light: #dbeafe;
+
+  /* Bionic Health Nexus Colors & Tokens */
+  --color-cobalt: #0d5c52;
+  --color-cobalt-deep: #083c35;
+  --color-cobalt-soft: rgba(13, 92, 82, 0.1);
+  --color-cobalt-light: #147a6d;
+  --color-emerald: #10b981;
+  --color-emerald-soft: rgba(16, 185, 129, 0.12);
+  --color-lime: #d4f83c;
+  --color-lime-ink: #1a4d2e;
+  --color-coral: #ef4444;
+  --color-coral-soft: rgba(239, 68, 68, 0.12);
+  --color-amber: #f59e0b;
+  --color-amber-soft: rgba(245, 158, 11, 0.14);
+
+  /* Radii */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 1.75rem;
+}
+
+/* ============================
+   Base Reset & Layout Fixes
+   ============================ */
+
+*, ::before, ::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: var(--font-body), 'DM Sans', sans-serif;
+  color: #1a2332;
+  background-color: #f8fafb;
+  line-height: 1.6;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading), 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* Utility fallbacks to guarantee crisp styling */
+.bg-primary-500 { background-color: #22a699 !important; }
+.bg-primary-600 { background-color: #198578 !important; }
+.bg-primary-50 { background-color: #edfaf8 !important; }
+.bg-primary-100 { background-color: #d2f3ee !important; }
+.text-primary-500 { color: #22a699 !important; }
+.text-primary-600 { color: #198578 !important; }
+.text-primary-700 { color: #186a62 !important; }
+.border-primary-500 { border-color: #22a699 !important; }
+
+.bg-surface { background-color: #f8fafb !important; }
+.bg-surface-raised { background-color: #ffffff !important; }
+.bg-surface-muted { background-color: #f1f4f6 !important; }
+.border-border-light { border-color: #e5e9ec !important; }
+
+.text-text-primary { color: #1a2332 !important; }
+.text-text-secondary { color: #5a6577 !important; }
+.text-text-muted { color: #8f99a8 !important; }
+
+.bg-critical { background-color: #ef4444 !important; }
+.bg-critical-light { background-color: #fee2e2 !important; }
+.bg-success { background-color: #10b981 !important; }
+.bg-success-light { background-color: #d1fae5 !important; }
+.bg-warning { background-color: #f59e0b !important; }
+.bg-warning-light { background-color: #fef3c7 !important; }
+
+/* ============================
+   Custom Animations
+   ============================ */
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 0.3; }
+  100% { transform: scale(0.8); opacity: 0.8; }
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 166, 153, 0.4); }
+  50% { transform: scale(1.05); box-shadow: 0 0 0 12px rgba(34, 166, 153, 0); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-pulse-ring { animation: pulse-ring 2s ease-in-out infinite; }
+.animate-breathe { animation: breathe 2.5s ease-in-out infinite; }
+.animate-fade-in-up { animation: fade-in-up 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+/* Custom shadows */
+.shadow-card { box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04); }
+.shadow-card-hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #e5e9ec; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #8f99a8; }
+
+/* ============================================================
+   BIONIC HEALTH NEXUS — Glassmorphic Design System & Telemetry
+   ============================================================ */
+
+:root {
+  --bionic-radius: 1.25rem;
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.19 0.012 150);
+  --cobalt: oklch(0.398 0.079 168); /* Deep clinic teal */
+  --cobalt-deep: oklch(0.315 0.068 168);
+  --cobalt-soft: oklch(0.398 0.079 168 / 10%);
+  --emerald: oklch(0.5 0.1 165);
+  --emerald-soft: oklch(0.5 0.1 165 / 12%);
+  --lime: oklch(0.925 0.18 115);
+  --lime-ink: oklch(0.33 0.07 140);
+  --coral: oklch(0.585 0.2 27);
+  --coral-soft: oklch(0.585 0.2 27 / 11%);
+  --amber: oklch(0.72 0.15 68);
+  --amber-soft: oklch(0.72 0.15 68 / 14%);
+  --canvas-from: oklch(0.968 0.004 120);
+  --canvas-to: oklch(0.94 0.006 130);
+  --shadow-glass: 0 2px 14px oklch(0.3 0.02 150 / 0.05);
+  --shadow-float: 0 20px 44px -22px oklch(0.3 0.05 160 / 0.35);
+  --shadow-cobalt: 0 10px 26px -12px oklch(0.398 0.079 168 / 0.55);
+}
+
+/* Color utility classes for Bionic Components */
+.bg-cobalt { background-color: var(--cobalt) !important; }
+.bg-cobalt-deep { background-color: var(--cobalt-deep) !important; }
+.bg-cobalt-soft { background-color: var(--cobalt-soft) !important; }
+.text-cobalt { color: var(--cobalt) !important; }
+.border-cobalt { border-color: var(--cobalt) !important; }
+
+.bg-emerald { background-color: var(--emerald) !important; }
+.bg-emerald-soft { background-color: var(--emerald-soft) !important; }
+.text-emerald { color: var(--emerald) !important; }
+
+.bg-lime { background-color: var(--lime) !important; }
+.text-lime-ink { color: var(--lime-ink) !important; }
+
+.bg-coral { background-color: var(--coral) !important; }
+.bg-coral-soft { background-color: var(--coral-soft) !important; }
+.text-coral { color: var(--coral) !important; }
+.border-coral { border-color: var(--coral) !important; }
+
+.bg-amber { background-color: var(--amber) !important; }
+.bg-amber-soft { background-color: var(--amber-soft) !important; }
+.text-amber { color: var(--amber) !important; }
+
+.shadow-glass { box-shadow: var(--shadow-glass) !important; }
+.shadow-float { box-shadow: var(--shadow-float) !important; }
+.shadow-cobalt { box-shadow: 0 10px 26px -10px rgba(13, 92, 82, 0.55) !important; }
+
+/* Dedicated high-contrast Bionic primary button */
+.btn-bionic {
+  background: linear-gradient(135deg, #0d5c52 0%, #083c35 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 26px -10px rgba(13, 92, 82, 0.55) !important;
+  font-weight: 700 !important;
+  transition: all 0.25s ease !important;
+  border: 1px solid rgba(13, 92, 82, 0.2) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+}
+.btn-bionic:hover {
+  filter: brightness(1.12) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 14px 30px -10px rgba(13, 92, 82, 0.65) !important;
+}
+.btn-bionic:active {
+  transform: translateY(0px) !important;
+}
+
+.btn-bionic-outline {
+  background-color: #ffffff !important;
+  color: #0d5c52 !important;
+  border: 1px solid rgba(13, 92, 82, 0.25) !important;
+  font-weight: 700 !important;
+  transition: all 0.25s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+}
+.btn-bionic-outline:hover {
+  background-color: rgba(13, 92, 82, 0.06) !important;
+  border-color: #0d5c52 !important;
+  transform: translateY(-1px) !important;
+}
+
+.glass-card {
+  background-color: #ffffff;
+  border: 1px solid oklch(0.915 0.006 130 / 0.9);
+  box-shadow: var(--shadow-glass);
+  border-radius: 1.75rem;
+}
+
+.soft-card {
+  background-color: oklch(0.955 0.004 120);
+  border: 1px solid transparent;
+  border-radius: 1.75rem;
+}
+
+.tile-lift {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.tile-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-float);
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.glass-pill {
+  background-color: #ffffff;
+  border: 1px solid oklch(0.915 0.006 130 / 0.9);
+  border-radius: 999px;
+}
+
+.kiosk-canvas {
+  background-image:
+    radial-gradient(48rem 30rem at 5% -12%, oklch(0.9 0.09 135 / 0.35), transparent 62%),
+    radial-gradient(40rem 26rem at 98% 8%, oklch(0.88 0.06 160 / 0.32), transparent 62%),
+    radial-gradient(44rem 28rem at 72% 108%, oklch(0.9 0.08 130 / 0.3), transparent 62%),
+    linear-gradient(160deg, var(--canvas-from), var(--canvas-to));
+}
+
+@keyframes ecg-sweep {
+  from {
+    stroke-dashoffset: 620;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes soft-pulse {
+  0%, 100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.35);
+  }
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+.animate-ecg {
+  stroke-dasharray: 620;
+  animation: ecg-sweep 3.2s linear infinite;
+}
+
+.animate-soft-pulse {
+  animation: soft-pulse 2s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 7s ease-in-out infinite;
+}
+
+/* ============================================================
+   STITCH ZEN-CLINICAL GLASS UTILITIES & SHADOWS
+   ============================================================ */
+
+.bg-surface-glass {
+  background-color: rgba(255, 255, 255, 0.84) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+
+.border-glass {
+  border-color: rgba(255, 255, 255, 0.65) !important;
+}
+
+.touch-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+.touch-pill:active {
+  transform: scale(0.96);
+}
+
+.shadow-teal-glow {
+  box-shadow: 0 10px 28px -6px rgba(13, 148, 136, 0.35) !important;
+}
+
+.shadow-amber-glow {
+  box-shadow: 0 10px 24px -6px rgba(245, 158, 11, 0.28) !important;
+}
+
+.shadow-coral-glow {
+  box-shadow: 0 10px 28px -6px rgba(239, 68, 68, 0.35) !important;
+}
+
+@keyframes pulseTravel {
+  0% { transform: translateX(-100%); width: 25%; }
+  50% { transform: translateX(100%); width: 50%; }
+  100% { transform: translateX(350%); width: 25%; }
+}
+
+@keyframes breatheGlow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 1;
+    filter: drop-shadow(0 0 18px rgba(13, 148, 136, 0.45));
+  }
+}
+
+.animate-breathe-glow {
+  animation: breatheGlow 3s ease-in-out infinite;
+}
+
+/* ============================================================
+   SAFE AREA & MOBILE ERGONOMICS (Video Frame Audit)
+   ============================================================ */
+
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+}
+
+.pt-safe {
+  padding-top: max(var(--sat), 16px) !important;
+}
+
+.pb-safe {
+  padding-bottom: max(var(--sab), 16px) !important;
+}
+
+.pl-safe {
+  padding-left: max(var(--sal), 16px) !important;
+}
+
+.pr-safe {
+  padding-right: max(var(--sar), 16px) !important;
+}
+
+/* ============================================================
+   MOBILE BOTTOM NAVIGATION BAR (Fixes Frame 024 Vertical Stack)
+   ============================================================ */
+
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding-top: 0.5rem;
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 0.65rem);
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.mobile-bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.75rem;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-heading), 'Plus Jakarta Sans', sans-serif;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  min-width: 54px;
+}
+
+.mobile-bottom-nav-item:active {
+  transform: scale(0.92);
+}
+
+.mobile-bottom-nav-item.active {
+  color: #0d5c52;
+}
+
+.mobile-bottom-nav-item.active .nav-icon-wrapper {
+  background: rgba(13, 92, 82, 0.12);
+  color: #0d5c52;
+  transform: translateY(-2px);
+}
+
+.nav-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.nav-icon-wrapper svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Tap bounce micro-interaction */
+.tap-bounce:active {
+  transform: scale(0.94);
+}
+
+
+
