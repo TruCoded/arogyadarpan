@@ -235,7 +235,7 @@ export default function PatientDetail() {
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5">
                   <span className="font-heading font-black text-slate-900 text-base">ArogyaDarpan</span>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-[#006947] font-mono text-[10px] font-bold border border-emerald-200/60">
+                  <span className="px-2 py-0.5 rounded-full bg-blue-50 text-[#174ea6] font-mono text-[10px] font-bold border border-blue-200/60">
                     Clinical Decision Station
                   </span>
                 </div>
@@ -249,12 +249,12 @@ export default function PatientDetail() {
               onClick={() => setFhirModalOpen(true)}
               className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-mono font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer flex items-center gap-1.5"
             >
-              <Code className="size-3.5 text-teal-700" />
+              <Code className="size-3.5 text-[#174ea6]" />
               <span className="hidden sm:inline">FHIR Bundle JSON</span>
             </button>
             <button
               onClick={() => setFhirModalOpen(true)}
-              className="px-3.5 py-1.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-heading font-bold shadow-sm transition cursor-pointer flex items-center gap-1.5"
+              className="px-3.5 py-1.5 rounded-xl bg-[#174ea6] hover:bg-[#123b79] text-white text-xs font-heading font-bold shadow-sm transition cursor-pointer flex items-center gap-1.5"
             >
               <Download className="size-3.5" />
               <span>Export ABDM</span>
@@ -273,9 +273,9 @@ export default function PatientDetail() {
               transition={{ duration: 0.4 }}
               className="space-y-4"
             >
-              {/* Stitch Screen 14 Patient Profile & Critical Alert Context Card */}
+              {/* Patient Profile Context Card */}
               <div className="rounded-2xl bg-white border border-slate-200/80 p-4 shadow-xs flex flex-col gap-3 relative overflow-hidden">
-                <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full bg-teal-500/10 blur-2xl pointer-events-none" />
+                <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full bg-blue-500/10 blur-2xl pointer-events-none" />
 
                 {/* Demographics Main Row */}
                 <div className="flex items-start justify-between gap-2">
@@ -286,7 +286,7 @@ export default function PatientDetail() {
                         alt={patient.name}
                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjh8_SbNrrj7vsSdr0izshu6DgHanECLYgYVC745-J1gdhfCDIwtFMEjR5FT0cJGzqVSyvXQyJHXs87YGWPGvKKoR1wFc7tTZRT4pfZ8OaHcAU9MQZChLoySy5X198becf5PBxIFPQhR6lDKPHB5tf8RwfhH2fod7wntVf6O2MkHr1fpx7Ypsj2Xxdt96jqU8F-pG6MJq1GIgQlwn0zopNo4rDbpdS5ZQ3yzBjO5e6yrbGjFu5lHWc"
                       />
-                      <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-[#00855b] ring-2 ring-white" />
+                      <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-[#174ea6] ring-2 ring-white" />
                     </div>
                     <div className="flex flex-col min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
@@ -296,19 +296,19 @@ export default function PatientDetail() {
                         <span className="font-mono text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
                           {patient.age || '32'}{patient.gender ? patient.gender[0] : 'M'}
                         </span>
-                        <span className="font-mono text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-[#006947] border border-emerald-200/60">
+                        <span className="font-mono text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-[#174ea6] border border-blue-200/60">
                           B+
                         </span>
                       </div>
                       <div className="flex items-center gap-1 text-[11px] font-mono text-slate-500 mt-0.5">
-                        <span className="material-symbols-outlined text-[13px] text-teal-700">badge</span>
+                        <span className="material-symbols-outlined text-[13px] text-[#174ea6]">badge</span>
                         <span>ABHA: {patient.abhaId || '91-8842-1920-4491'}</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="flex flex-col items-end shrink-0">
-                    <span className="font-mono text-[10px] font-bold px-2 py-1 rounded-lg bg-teal-50 text-teal-800 border border-teal-200/60 flex items-center gap-1">
+                    <span className="font-mono text-[10px] font-bold px-2 py-1 rounded-lg bg-blue-50 text-[#174ea6] border border-blue-200/60 flex items-center gap-1">
                       <span className="material-symbols-outlined text-[13px]">meeting_room</span>
                       OPD 204
                     </span>
