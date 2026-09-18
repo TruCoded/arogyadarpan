@@ -27,6 +27,19 @@ const LANGUAGE_MAP = {
   ml: { bcp47: 'ml-IN', alt: 'ml', name: 'Malayalam' },
 }
 
+const PHONETIC_FALLBACKS = {
+  en: 'Hello. You can use ArogyaDarpan in English.',
+  hi: 'Namaste. Aap ArogyaDarpan ka upyog Hindi mein kar sakte hain.',
+  pa: 'Sat Sri Akal. Tusee ArogyaDarpan nu Punjabi vich varat sakde ho.',
+  bn: 'Nomoshkar. Aponi Banglay ArogyaDarpan byabohar korte paren.',
+  ta: 'Vanakkam. Neengal ArogyaDarpanai Thamizhil payanpaduthalaam.',
+  te: 'Namaskaram. Meeru ArogyaDarpan nu Telugu lo upayoginchavachhu.',
+  mr: 'Namaskar. Tumhi ArogyaDarpan Marathit vapru shakta.',
+  gu: 'Namaste. Tame ArogyaDarpan no Gujarati ma upyog kari shako chho.',
+  kn: 'Namaskara. Neevu ArogyaDarpan vannu Kannada dalli balasabahudu.',
+  ml: 'Namaskaram. Ningalkku ArogyaDarpan Malayalathil upayogikkam.',
+}
+
 function transliterateGurmukhiToHindi(text) {
   if (!text) return text
   let result = ''
@@ -53,7 +66,7 @@ export function playLanguageAudio(text, langCode = 'hi', onEnd, onError) {
   const safeLang = langCode || 'hi'
   const langConfig = LANGUAGE_MAP[safeLang] || { bcp47: `${safeLang}-IN`, alt: 'hi-IN' }
 
-  // Strategy 1: Web Speech API (Fastest & direct on user click gesture)
+  // Strategy 1: Web Speech API
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     try {
       window.speechSynthesis.cancel()
@@ -65,31 +78,36 @@ export function playLanguageAudio(text, langCode = 'hi', onEnd, onError) {
         v.lang.toLowerCase() === langConfig.bcp47.toLowerCase() ||
         v.lang.toLowerCase().startsWith(safeLang.toLowerCase())
       )
-      const altVoice = voices.find(v => 
+      const indianVoice = voices.find(v => 
         v.lang.toLowerCase() === langConfig.alt.toLowerCase() ||
         v.lang.toLowerCase().includes('in') ||
         v.lang.toLowerCase().includes('hi')
       )
-      const defaultVoice = voices.find(v => v.lang.includes('en-IN') || v.lang.includes('hi')) || voices[0]
+      const defaultVoice = voices[0]
 
-      const chosenVoice = exactVoice || altVoice || defaultVoice
+      const chosenVoice = exactVoice || indianVoice || defaultVoice
 
-      // If Punjabi (or other Indic script) lacks an offline voice pack in Windows, transliterate for the Indian voice
+      // Select the optimal speech text based on available voice engine
       let textToSpeak = text
-      if (safeLang === 'pa' && !exactVoice) {
-        textToSpeak = transliterateGurmukhiToHindi(text)
+      if (exactVoice) {
+        textToSpeak = text
+      } else if (indianVoice) {
+        textToSpeak = safeLang === 'pa' ? transliterateGurmukhiToHindi(text) : text
+      } else {
+        // Fallback for English-only systems (e.g. standard Windows without Indic voice packs)
+        textToSpeak = PHONETIC_FALLBACKS[safeLang] || text
       }
 
       const utterance = new SpeechSynthesisUtterance(textToSpeak)
 
       if (chosenVoice) {
         utterance.voice = chosenVoice
-        utterance.lang = exactVoice ? langConfig.bcp47 : (chosenVoice.lang || 'hi-IN')
+        utterance.lang = exactVoice ? langConfig.bcp47 : (indianVoice ? (chosenVoice.lang || 'hi-IN') : 'en-IN')
       } else {
         utterance.lang = langConfig.bcp47
       }
 
-      utterance.rate = 0.92
+      utterance.rate = 0.90
       utterance.pitch = 1.0
 
       let hasFinished = false
