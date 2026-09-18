@@ -9,7 +9,7 @@ import { playLanguageAudio, stopLanguageAudio } from '../../services/audioTtsSer
 export default function ConsentScreen() {
   const navigate = useNavigate()
   const { lang, t } = useLanguage()
-  const [agreed, setAgreed] = useState(false)
+  const [agreed, setAgreed] = useState(true)
   const [speaking, setSpeaking] = useState(false)
   const [options, setOptions] = useState({ historyCollection: true, documentOCR: true, abdmSync: false })
 
