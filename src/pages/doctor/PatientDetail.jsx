@@ -20,6 +20,7 @@ import DocumentInspectorModal from '../../components/DocumentInspectorModal'
 import DrugSafetyBanner from '../../components/DrugSafetyBanner'
 import DifferentialDiagnosisWidget from '../../components/DifferentialDiagnosisWidget'
 import LanguageSelector from '../../components/LanguageSelector'
+import ArogyaDarpanLogo from '../../components/ArogyaDarpanLogo'
 import { getDemoPatient } from '../../data/demoPatients'
 import { prepareFHIRBundle } from '../../services/abdmService'
 import { generateDifferentialDiagnosis } from '../../services/differentialEngine'
@@ -226,12 +227,8 @@ export default function PatientDetail() {
             >
               <ArrowLeft className="size-4" />
             </button>
-            <div className="flex items-center gap-2">
-              <img
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3eHJKlVlUerGVveGjWkAx0cFSCFro69yrIgqK3eka9ng6vqBFVGwgS2A1JBO0Lkr1B0YbrOAAqvpUol5ZixVmusIi8jYTSaQiV7PMb6CxrfSD-IXp-euifp5q0XRj-wTGxgLPdrcblNl08nnijat-BbHaH3XgsPx0yCKVhGM61cCDKXumY2fD-oQOhvcj5VgkwBSyiovAsy0-8W-nsfxyd2QqLNcETBIQ-JauQLnM_nekVmrRDp-J"
-                alt="ArogyaDarpan Logo"
-                className="h-7 w-auto object-contain"
-              />
+            <div className="flex items-center gap-3">
+              <ArogyaDarpanLogo size="sm" />
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5">
                   <span className="font-heading font-black text-slate-900 text-base">ArogyaDarpan</span>

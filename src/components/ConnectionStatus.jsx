@@ -21,8 +21,8 @@ export default function ConnectionStatus() {
         inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium
         transition-all duration-300
         ${online
-          ? 'bg-emerald-50 text-emerald-600'
-          : 'bg-amber-50 text-amber-600'
+          ? 'bg-blue-50 text-[#174ea6] border border-blue-200/60'
+          : 'bg-amber-50 text-amber-600 border border-amber-200/60'
         }
       `}
     >

@@ -9,6 +9,7 @@ import {
 import { DEMO_PATIENTS, DEMO_DOCTOR } from '../../data/demoPatients'
 import ConnectionStatus from '../../components/ConnectionStatus'
 import LanguageSelector from '../../components/LanguageSelector'
+import ArogyaDarpanLogo from '../../components/ArogyaDarpanLogo'
 import { useLanguage } from '../../context/LanguageContext'
 
 const fadeIn = {
@@ -69,9 +70,7 @@ export default function DoctorDashboard() {
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md px-4 sm:px-6 py-3 sm:py-4 pt-safe shadow-xs">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="size-10 rounded-2xl bg-gradient-to-tr from-[#174ea6] to-[#123b79] flex items-center justify-center shadow-md text-white">
-              <Stethoscope className="size-5" />
-            </div>
+            <ArogyaDarpanLogo size="sm" />
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-heading text-lg font-black tracking-tight text-slate-900">
