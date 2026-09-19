@@ -87,10 +87,11 @@ export default function LanguageSelector({ variant = 'compact', className = '' }
                     <div className="flex items-center gap-2.5">
                       <span className="text-base">{l.flag}</span>
                       <div>
-                        <p className="leading-tight">{l.native}</p>
+                        <p className="leading-tight font-bold">{l.native}</p>
+                        <p className="text-[10px] text-slate-500 font-normal">{l.label}</p>
                       </div>
                     </div>
-                    {isSelected && <Check className="w-3.5 h-3.5 text-primary-600 shrink-0" />}
+                    {isSelected && <Check className="w-4 h-4 text-[#174ea6] shrink-0" />}
                   </button>
                 )
               })}
