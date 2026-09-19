@@ -101,6 +101,14 @@ export default function DocumentReview() {
     status: 'normal',
   })
 
+  // Strict Medical Document Validation check
+  const isDocumentValid = ocrData?.isValidMedicalDocument !== false && (
+    medications.length > 0 ||
+    investigations.length > 0 ||
+    diagnoses.length > 0 ||
+    Boolean(ocrData?.doctorInfo?.name || ocrData?.doctorInfo?.clinicName)
+  )
+
   // Re-run drug interaction check whenever medications change
   const drugInteractions = detectDrugInteractions(medications)
 
@@ -167,6 +175,8 @@ export default function DocumentReview() {
 
   // Save confirmed data and proceed to confirmation
   const handleConfirmAndContinue = () => {
+    if (!isDocumentValid) return
+
     const updatedOcrResult = {
       ...ocrData,
       extractedData: {
@@ -230,6 +240,59 @@ export default function DocumentReview() {
             {t('reviewInfo', 'Our clinical OCR engine read your uploaded document. Please check the medications, dosages, and test results below and make any corrections if needed.')}
           </p>
         </div>
+
+        {/* Invalid Document Warning Banner */}
+        {!isDocumentValid && (
+          <section className="rounded-3xl border-2 border-red-300 bg-red-50/95 p-6 text-red-950 shadow-sm space-y-4">
+            <div className="flex items-start gap-3.5">
+              <div className="size-11 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center shrink-0 border border-red-200">
+                <AlertTriangle className="size-6" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-2.5 py-0.5 rounded-full bg-red-200 text-red-800 text-xs font-black uppercase tracking-wider">
+                    Non-Medical Image Detected
+                  </span>
+                  <span className="text-xs font-bold text-red-600">Verification Blocked</span>
+                </div>
+                <h3 className="text-base sm:text-lg font-extrabold text-red-900 mt-1 font-heading">
+                  Cannot Confirm as Medical Record
+                </h3>
+                <p className="text-xs sm:text-sm text-red-800 leading-relaxed mt-1">
+                  {ocrData?.validationError || 'Our clinical OCR validator could not detect any doctor handwriting, physician credentials (Dr. / MBBS), hospital or clinic headers, prescribed medications (with dosages/timings), or lab test findings in this image.'}
+                </p>
+                <p className="text-xs text-red-700 font-semibold mt-2">
+                  ℹ️ To ensure clinical patient safety, ArogyaDarpan requires an authentic doctor prescription, lab report, or hospital discharge summary.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-red-200 flex flex-wrap items-center gap-2.5 justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  const updatedDocs = documents.slice(1)
+                  localStorage.setItem('arogya_documents', JSON.stringify(updatedDocs))
+                  localStorage.removeItem('arogya_ocr_result')
+                  localStorage.removeItem('arogya_last_doc_preview')
+                  navigate('/patient/documents')
+                }}
+                className="px-4 py-2.5 rounded-xl bg-white border border-red-200 text-red-700 hover:bg-red-100 text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
+              >
+                <Trash2 className="size-3.5" />
+                <span>Remove Image</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/patient/documents')}
+                className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition cursor-pointer shadow-sm flex items-center gap-1.5"
+              >
+                <Plus className="size-3.5" />
+                <span>Upload Valid Prescription / Report</span>
+              </button>
+            </div>
+          </section>
+        )}
 
         {/* 1. Document Overview & Source Preview Card */}
         <section className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs transition-all hover:shadow-md">
@@ -623,14 +686,26 @@ export default function DocumentReview() {
           >
             {t('back', 'Back')}
           </button>
-          <button
-            type="button"
-            onClick={handleConfirmAndContinue}
-            className="flex-1 rounded-full bg-[#174ea6] hover:bg-[#123b79] px-5 py-3.5 text-sm font-bold text-white transition cursor-pointer shadow-md flex items-center justify-center gap-2"
-          >
-            <Check className="size-4" />
-            <span>{t('continueConfirmation', 'Confirm & Continue to Summary')}</span>
-          </button>
+          {isDocumentValid ? (
+            <button
+              type="button"
+              onClick={handleConfirmAndContinue}
+              className="flex-1 rounded-full bg-[#174ea6] hover:bg-[#123b79] px-5 py-3.5 text-sm font-bold text-white transition cursor-pointer shadow-md flex items-center justify-center gap-2"
+            >
+              <Check className="size-4" />
+              <span>{t('continueConfirmation', 'Confirm & Continue to Summary')}</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled
+              title="Cannot confirm non-medical document"
+              className="flex-1 rounded-full bg-slate-200 border border-slate-300 text-slate-400 cursor-not-allowed px-5 py-3.5 text-sm font-bold flex items-center justify-center gap-2"
+            >
+              <AlertTriangle className="size-4 text-amber-500" />
+              <span>Cannot Confirm (Non-Medical Image)</span>
+            </button>
+          )}
         </div>
       </div>
 

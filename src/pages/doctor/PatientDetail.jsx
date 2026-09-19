@@ -215,14 +215,14 @@ export default function PatientDetail() {
   const activeAllergies = summary.allergies ? (summary.allergies.historicalRecord ? [summary.allergies.historicalRecord] : ['Penicillin']) : []
 
   return (
-    <div className="min-h-screen kiosk-canvas text-slate-900 pb-16 pb-safe select-none">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50/50 via-slate-50 to-slate-50 text-slate-900 font-sans pb-16 pb-safe select-none">
       {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl px-4 sm:px-8 py-3.5 shadow-xs pt-safe">
+      <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 backdrop-blur-xl px-4 sm:px-8 py-3.5 shadow-xs pt-safe">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/doctor')}
-              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition cursor-pointer"
+              className="p-2 rounded-xl bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-[#174ea6] transition cursor-pointer"
               title="Back to Dashboard"
             >
               <ArrowLeft className="size-4" />
@@ -231,8 +231,8 @@ export default function PatientDetail() {
               <ArogyaDarpanLogo size="sm" />
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-heading font-black text-slate-900 text-base">ArogyaDarpan</span>
-                  <span className="px-2 py-0.5 rounded-full bg-blue-50 text-[#174ea6] font-mono text-[10px] font-bold border border-blue-200/60">
+                  <span className="font-heading font-black text-[#123b79] text-base">ArogyaDarpan</span>
+                  <span className="px-2 py-0.5 rounded-full bg-blue-50 text-[#174ea6] font-mono text-[10px] font-bold border border-blue-200/80">
                     Clinical Decision Station
                   </span>
                 </div>
@@ -244,14 +244,14 @@ export default function PatientDetail() {
             <LanguageSelector variant="compact" />
             <button
               onClick={() => setFhirModalOpen(true)}
-              className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-mono font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer flex items-center gap-1.5"
+              className="px-3.5 py-1.5 rounded-xl border border-blue-200 bg-white text-xs font-mono font-bold text-[#174ea6] hover:bg-blue-50 transition cursor-pointer flex items-center gap-1.5 shadow-2xs"
             >
               <Code className="size-3.5 text-[#174ea6]" />
               <span className="hidden sm:inline">FHIR Bundle JSON</span>
             </button>
             <button
               onClick={() => setFhirModalOpen(true)}
-              className="px-3.5 py-1.5 rounded-xl bg-[#174ea6] hover:bg-[#123b79] text-white text-xs font-heading font-bold shadow-sm transition cursor-pointer flex items-center gap-1.5"
+              className="px-4 py-1.5 rounded-xl bg-[#174ea6] hover:bg-[#123b79] text-white text-xs font-heading font-bold shadow-sm shadow-blue-800/25 transition cursor-pointer flex items-center gap-1.5"
             >
               <Download className="size-3.5" />
               <span>Export ABDM</span>
@@ -375,17 +375,17 @@ export default function PatientDetail() {
             )}
 
             {/* Tab Nav */}
-            <div className="flex items-center gap-1.5 bg-white rounded-2xl border border-slate-200/80 p-1.5 shadow-xs overflow-x-auto">
+            <div className="flex items-center gap-1.5 bg-white/95 rounded-2xl border border-blue-200/80 p-1.5 shadow-xs overflow-x-auto backdrop-blur-md">
               {tabs.map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`
-                    flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold font-heading whitespace-nowrap
+                    flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold font-heading whitespace-nowrap
                     transition-all cursor-pointer
                     ${activeTab === tab.id
-                      ? 'bg-slate-950 text-white shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                      ? 'bg-[#174ea6] text-white shadow-md shadow-blue-800/25 ring-1 ring-blue-700'
+                      : 'text-slate-600 hover:text-[#174ea6] hover:bg-blue-50/80'
                     }
                   `}
                 >
@@ -605,17 +605,17 @@ export default function PatientDetail() {
                   )}
 
                   {/* 9. Physician Clinical Notes, Orders & Rx Plan */}
-                  <Card className="border-2 border-primary-300 shadow-md bg-gradient-to-br from-surface to-primary-50/20">
-                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-border-light">
+                  <Card className="border-2 border-blue-200 shadow-sm bg-gradient-to-br from-white via-blue-50/20 to-blue-50/40">
+                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-blue-100">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-white">
+                        <div className="w-8 h-8 rounded-lg bg-[#174ea6] flex items-center justify-center text-white">
                           <Stethoscope className="w-4 h-4" />
                         </div>
                         <div>
-                          <h3 className="font-bold text-text-primary font-heading text-base">
+                          <h3 className="font-bold text-slate-900 font-heading text-base">
                             Physician Clinical Notes, Orders & Prescription Plan
                           </h3>
-                          <p className="text-xs text-text-muted">ABDM Practitioner Direct EHR Entry</p>
+                          <p className="text-xs text-slate-500">ABDM Practitioner Direct EHR Entry</p>
                         </div>
                       </div>
                       {physicianOrders.isSigned ? (

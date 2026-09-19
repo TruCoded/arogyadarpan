@@ -113,6 +113,61 @@ function normalizeFrequencyString(freqStr = '') {
  * Advanced Medical Prescription Line Parser
  * Extracts Rx lines, forms, dosages, frequencies, durations, instructions, and advice.
  */
+// ----------------------------------------------------------------------------
+// Comprehensive Indian Clinical Medication & Brand Names Dictionary
+// ----------------------------------------------------------------------------
+const COMMON_INDIAN_MEDICINES = [
+  'metformin', 'glycomet', 'glucophage', 'obimet', 'cetapin',
+  'glimepiride', 'amaryl', 'glimisave', 'glimy', 'zoryl',
+  'vildagliptin', 'galvus', 'jalra', 'sitagliptin', 'januvia',
+  'dapagliflozin', 'forxiga', 'oxra', 'empagliflozin', 'jardiance',
+  'paracetamol', 'pcm', 'crocin', 'dolo', 'calpol', 'panadol', 'pacimol',
+  'aceclofenac', 'zerodol', 'hifenac', 'aceclo',
+  'diclofenac', 'voveran', 'dynapar', 'reactin',
+  'ibuprofen', 'brufen', 'combiflam', 'ibugesic',
+  'tramadol', 'ultram', 'tramazac', 'tramacip',
+  'pantoprazole', 'pan', 'pantocid', 'pantodac', 'pantosec',
+  'rabeprazole', 'razo', 'rablet', 'happi', 'rabicip',
+  'omeprazole', 'omez', 'omiz', 'ocid',
+  'esomeprazole', 'nexpro', 'esomac',
+  'ranitidine', 'aciloc', 'rantac', 'famotidine',
+  'amlodipine', 'amlong', 'stamlo', 'amlovas', 'amlo',
+  'telmisartan', 'telma', 'telmikind', 'telsar', 'telpres',
+  'losartan', 'losacar', 'repace', 'losar',
+  'olmesartan', 'olmat', 'olmin',
+  'atenolol', 'aten', 'betacard', 'metoprolol', 'betaloc', 'metolar',
+  'atorvastatin', 'atorva', 'lipitor', 'storvas', 'atocor',
+  'rosuvastatin', 'rosuvas', 'rozavel', 'crestor',
+  'aspirin', 'ecosprin', 'disprin', 'asa', 'loprin',
+  'clopidogrel', 'clopilet', 'plavix', 'clopivas', 'deplatt',
+  'amoxicillin', 'mox', 'novamox', 'amoxil', 'augmentin', 'clamamox', 'moxikind',
+  'azithromycin', 'azee', 'azithral', 'zady', 'azit',
+  'cefixime', 'zifi', 'ceftas', 'taxim-o', 'mahacef',
+  'ciprofloxacin', 'cifran', 'ciro', 'ciplox',
+  'levofloxacin', 'levomac', 'levoflox', 'l-cin',
+  'doxycycline', 'doxy-1', 'microdox',
+  'montelukast', 'montair', 'montek', 'telekast',
+  'levocetirizine', 'levocet', 'levorid', 'vozcet',
+  'cetirizine', 'cetzine', 'okacet', 'alerid',
+  'salbutamol', 'asthalin', 'ventorlin',
+  'budesonide', 'budecort', 'pulmicort',
+  'formoterol', 'foracort', 'maxiflo',
+  'cough syrup', 'ascoril', 'benadryl', 'grilinctus', 'alex', 'chericof', 't-koff',
+  'levothyroxine', 'thyronorm', 'eltroxin', 'thyrox',
+  'gabapentin', 'gabapin', 'gabaneuron',
+  'pregabalin', 'pregalin', 'maxgalin', 'lyrica',
+  'alprazolam', 'alprax', 'restyl', 'clonazepam', 'clona', 'zapiz',
+  'multivitamin', 'becosules', 'supradyn', 'zincovit', 'a-to-z',
+  'calcium', 'shelcal', 'cipcal', 'calcimax', 'ostocalcium',
+  'vitamin d3', 'uprise-d3', 'd3-must', 'calcirol',
+  'iron', 'autrin', 'dexorange', 'feronia', 'orofer',
+]
+
+/**
+ * Advanced Medical Prescription Line Parser
+ * Extracts Rx lines, forms, dosages, frequencies, durations, instructions, and advice.
+ * Supports all standard Indian handwriting conventions and shortforms.
+ */
 export function parsePrescriptionLines(text) {
   if (!text) return { medications: [], diagnoses: [], labResults: [], advice: [], doctorInfo: {}, patientInfo: {} }
   const lines = text.split('\n').map(l => l.trim()).filter(Boolean)
@@ -134,34 +189,37 @@ export function parsePrescriptionLines(text) {
     gender: null,
   }
 
-  // Regex patterns
-  const medPrefixRegex = /^(?:(?:\d+[\.\)]\s*)?(?:Tab(?:let)?|Cap(?:sule)?|Syp(?:rup)?|Inj(?:ection)?|Oint(?:ment)?|Drops?|Cream|Gel|Susp(?:ension)?|Inhaler)\.?\s+)?([A-Za-z0-9\s\/\+\-]+?)(?:\s+(\d+(?:\.\d+)?\s*(?:mg|mcg|g|gm|ml|iu|%|puffs?|units?)))?(?:\s*[-—–:])?(?:\s+((?:[01]-[01]-[01]|[01]\s*x\s*[0-3]|OD|BD|BID|TDS|TID|QID|SOS|PRN|HS|AC|PC|Once\s+daily|Twice\s+daily|Thrice\s+daily|At\s+bedtime)))?(?:\s*(?:x|for|\*)\s*(\d+\s*(?:days?|weeks?|months?|d|w|m)))?/i
+  // Regex patterns for medicine line extraction
+  const medPrefixRegex = /^(?:(?:\d+[\.\)]\s*)?(?:Tab(?:let)?|Cap(?:sule)?|Syp(?:rup)?|Inj(?:ection)?|Oint(?:ment)?|Drops?|Cream|Gel|Susp(?:ension)?|Inhaler|Resp|Neb)\.?\s+)?([A-Za-z0-9\s\/\+\-]+?)(?:\s+(\d+(?:\.\d+)?\s*(?:mg|mcg|g|gm|ml|iu|%|puffs?|units?|drops?)))?(?:\s*[-—–:])?(?:\s+((?:[01]-[01]-[01]|[01]\s*x\s*[0-3]|OD|BD|BID|TDS|TID|QID|SOS|PRN|HS|AC|PC|BBF|M&N|Once\s+daily|Twice\s+daily|Thrice\s+daily|At\s+bedtime|Empty\s+stomach)))?(?:\s*(?:x|for|\*)\s*(\d+\s*(?:days?|weeks?|months?|d|w|m)))?/i
 
   for (const line of lines) {
     // 1. Doctor & Clinic headers
-    const docMatch = line.match(/(?:Dr\.|Doctor)\s+([A-Za-z\s\.]+)/i)
+    const docMatch = line.match(/(?:Dr\.|Doctor|Dr\s+)([A-Za-z\s\.]+)/i)
     if (docMatch && !doctorInfo.name) {
-      doctorInfo.name = `Dr. ${docMatch[1].trim()}`
+      const docClean = docMatch[1].trim()
+      if (docClean.length > 2 && !/^(prescription|date|clinic|hospital|patient|opd)$/i.test(docClean)) {
+        doctorInfo.name = `Dr. ${docClean}`
+      }
     }
-    const qualMatch = line.match(/\b(MBBS|MD|MS|DM|MCh|DNB|BAMS|BHMS|BDS)\b/i)
+    const qualMatch = line.match(/\b(MBBS|MD|MS|DM|MCh|DNB|BAMS|BHMS|BDS|MRCP|FRCP|DCH|DGO|DA)\b/i)
     if (qualMatch && !doctorInfo.qualification) {
       doctorInfo.qualification = qualMatch[0].toUpperCase()
     }
-    const regMatch = line.match(/(?:Reg(?:istration)?\.?\s*(?:No\.?)?|DMC|MCI|KMC|MMC)\s*[:=-]?\s*([A-Za-z0-9\-\/]+)/i)
+    const regMatch = line.match(/(?:Reg(?:istration)?\.?\s*(?:No\.?)?|DMC|MCI|KMC|MMC|TMC|GMC|PMC)\s*[:=-]?\s*([A-Za-z0-9\-\/]+)/i)
     if (regMatch && !doctorInfo.regNo) {
       doctorInfo.regNo = regMatch[1].trim()
     }
-    const clinicMatch = line.match(/(?:Hospital|Clinic|Health\s*Center|Nursing\s*Home|Dispensary|Medical\s*Centre|Care)/i)
-    if (clinicMatch && !doctorInfo.clinicName && line.length < 60) {
+    const clinicMatch = line.match(/(?:Hospital|Clinic|Health\s*Center|Nursing\s*Home|Dispensary|Medical\s*Centre|Pathology|Diagnostic|Polyclinic|Care)/i)
+    if (clinicMatch && !doctorInfo.clinicName && line.length < 70) {
       doctorInfo.clinicName = line.trim()
     }
 
     // 2. Patient Demographics
-    const ptMatch = line.match(/(?:Pt|Patient|Name)\s*[:=-]?\s*([A-Za-z\s]+?)(?:\s*[\/|,]|\s+(?:Age|Gender|Sex|Yr))/i)
+    const ptMatch = line.match(/(?:Pt|Patient|Name)\s*[:=-]?\s*([A-Za-z\s]+?)(?:\s*[\/|,]|\s+(?:Age|Gender|Sex|Yr|Y\/O|Date))/i)
     if (ptMatch && !patientInfo.name && ptMatch[1].trim().length > 2) {
       patientInfo.name = ptMatch[1].trim()
     }
-    const ageMatch = line.match(/\b(\d{1,3})\s*(?:yrs?|years?|y\/o)\b/i)
+    const ageMatch = line.match(/\b(\d{1,3})\s*(?:yrs?|years?|y\/o|yr)\b/i)
     if (ageMatch && !patientInfo.age) {
       patientInfo.age = parseInt(ageMatch[1], 10)
     }
@@ -183,50 +241,56 @@ export function parsePrescriptionLines(text) {
     const medMatch = line.match(medPrefixRegex)
     if (medMatch && medMatch[1] && medMatch[1].length > 2) {
       const candidateName = medMatch[1].trim()
-      // Exclude generic header or clinical section words
-      const isHeaderWord = /^(patient|doctor|date|clinic|hospital|investigation|diagnosis|report|test|rx|advice|history|treatment|findings|summary|notes|signature|seal|reg|age|gender|sex|phone|address)$/i.test(candidateName)
+      const isHeaderWord = /^(patient|doctor|date|clinic|hospital|investigation|diagnosis|report|test|rx|advice|history|treatment|findings|summary|notes|signature|seal|reg|age|gender|sex|phone|address|opd|room|name)$/i.test(candidateName)
       
       if (!isHeaderWord) {
         let form = 'Tablet'
-        if (/cap/i.test(line)) form = 'Capsule'
-        else if (/syp|syrup/i.test(line)) form = 'Syrup'
-        else if (/inj/i.test(line)) form = 'Injection'
-        else if (/oint|cream|gel/i.test(line)) form = 'Ointment'
-        else if (/drops?/i.test(line)) form = 'Drops'
-        else if (/inhaler/i.test(line)) form = 'Inhaler'
+        if (/\b(?:cap|capsule)\b/i.test(line)) form = 'Capsule'
+        else if (/\b(?:syp|syrup|susp|suspension)\b/i.test(line)) form = 'Syrup'
+        else if (/\b(?:inj|injection)\b/i.test(line)) form = 'Injection'
+        else if (/\b(?:oint|ointment|cream|gel)\b/i.test(line)) form = 'Ointment'
+        else if (/\b(?:drops?)\b/i.test(line)) form = 'Drops'
+        else if (/\b(?:inhaler|resp|neb)\b/i.test(line)) form = 'Inhaler'
 
         let timing = 'After Food (PC)'
-        if (/\b(?:ac|before (?:food|meals|breakfast)|empty stomach)\b/i.test(line)) {
+        if (/\b(?:ac|before (?:food|meals|breakfast)|empty stomach|bbf)\b/i.test(line)) {
           timing = 'Before Food (AC - Empty Stomach)'
-        } else if (/\b(?:hs|bedtime|night)\b/i.test(line)) {
-          timing = 'At Bedtime'
+        } else if (/\b(?:hs|bedtime|night|nocte)\b/i.test(line)) {
+          timing = 'At Bedtime (HS)'
+        } else if (/\b(?:sos|prn|as needed)\b/i.test(line)) {
+          timing = 'As Needed (SOS)'
         }
 
         const frequency = normalizeFrequencyString(medMatch[3] || '1-0-1')
-        const duration = medMatch[4] || '30 days'
+        const duration = medMatch[4] || 'As directed'
 
-        medications.push({
-          id: `med-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-          name: candidateName,
-          form,
-          strength: medMatch[2] ? medMatch[2].trim() : 'Standard dose',
-          frequency,
-          duration,
-          timing,
-          rawLine: line,
-          confidence: 0.92
-        })
+        // Check if candidate matches any known medicine keyword or has dosage
+        const isKnownMed = COMMON_INDIAN_MEDICINES.some(m => candidateName.toLowerCase().includes(m))
+        const hasStrength = Boolean(medMatch[2])
+
+        if (isKnownMed || hasStrength || /tab|cap|syp|inj/i.test(line)) {
+          medications.push({
+            id: `med-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+            name: candidateName,
+            form,
+            strength: medMatch[2] ? medMatch[2].trim() : 'Standard dose',
+            frequency,
+            duration,
+            timing,
+            rawLine: line,
+            confidence: isKnownMed ? 0.95 : 0.88
+          })
+        }
       }
     }
 
     // 5. Laboratory & Vital Signs
-    const labMatch = line.match(/(HbA1c|FBS|PPBS|Fasting Glucose|Creatinine|BUN|WBC|Hemoglobin|Hb|Platelets|SGPT|ALT|SGOT|AST|TSH|Cholesterol|LDL|HDL|Triglycerides|Uric Acid|BP|Blood Pressure|Troponin|SpO2|Glucose|Urea)\s*[:=-]?\s*([\d\.]+(?:\/\d+)?)\s*([a-zA-Z%\/]+)?/i)
+    const labMatch = line.match(/(HbA1c|FBS|PPBS|Fasting Glucose|Creatinine|BUN|WBC|TLC|Hemoglobin|Hb|Platelets|SGPT|ALT|SGOT|AST|TSH|Cholesterol|LDL|HDL|Triglycerides|Uric Acid|BP|Blood Pressure|Troponin|SpO2|Glucose|Urea|Bilirubin|ESR)\s*[:=-]?\s*([\d\.]+(?:\/\d+)?)\s*([a-zA-Z%\/]+)?/i)
     if (labMatch) {
       const testName = labMatch[1].trim()
       const rawVal = labMatch[2].trim()
       const unit = labMatch[3] ? labMatch[3].trim() : ''
       
-      // Determine status from known lab thresholds
       let status = 'normal'
       let direction = 'normal'
       const numVal = parseFloat(rawVal)
@@ -252,7 +316,7 @@ export function parsePrescriptionLines(text) {
     }
 
     // 6. Clinical Advice & Follow-up
-    const advMatch = line.match(/(?:Advice|Plan|Follow[- ]up|Precautions|Diet|Review)\s*[:=-]?\s*([^\n\r]+)/i)
+    const advMatch = line.match(/(?:Advice|Plan|Follow[- ]up|Precautions|Diet|Review|Adv)\s*[:=-]?\s*([^\n\r]+)/i)
     if (advMatch && advMatch[1] && advMatch[1].length > 3) {
       advice.push(advMatch[1].trim())
     }
@@ -309,7 +373,7 @@ export async function scanMedicalDocument(imageSource, onProgress) {
         strength: med.strength || 'Standard dose',
         frequency: med.frequency || '1-0-1 (Twice Daily)',
         duration: med.duration || 'As directed',
-        timing: med.timing || 'After Food',
+        timing: med.timing || 'After Food (PC)',
         category: 'Prescription Drug',
         confidence: med.confidence || 0.90,
       })
@@ -326,7 +390,7 @@ export async function scanMedicalDocument(imageSource, onProgress) {
         strength: med.strength || 'Standard dose',
         frequency: med.frequency || '1-0-1 (Twice Daily)',
         duration: med.duration || 'As directed',
-        timing: 'After Food',
+        timing: 'After Food (PC)',
         category: med.category || 'Prescription Drug',
         confidence: med.confidence || 0.88,
       })
@@ -389,15 +453,35 @@ export async function scanMedicalDocument(imageSource, onProgress) {
   // 7. Clinical Drug-Drug Interactions on actual extracted meds
   const detectedInteractions = allMedications.length > 1 ? detectDrugInteractions(allMedications) : []
 
+  // 8. Strict Medical Document Verification (Reject non-medical / artzy / blank images)
+  const hasMedications = allMedications.length > 0
+  const hasLabResults = mergedInvestigations.length > 0
+  const hasDoctorInfo = Boolean(rxParsed.doctorInfo?.name || rxParsed.doctorInfo?.clinicName || rxParsed.doctorInfo?.regNo || rxParsed.doctorInfo?.qualification)
+  const hasDiagnoses = allDiagnoses.length > 0
+  
+  // Stricter medical validation: MUST contain doctor handwriting/name, hospital/clinic, medications, or lab values
+  const isValidMedicalDocument = Boolean(
+    hasDoctorInfo ||
+    hasMedications ||
+    hasLabResults ||
+    hasDiagnoses
+  )
+
+  const validationError = isValidMedicalDocument
+    ? null
+    : 'Non-Medical Document Detected: No doctor credentials, clinic or hospital header, prescribed medications, or laboratory findings were detected in this image. To protect patient safety, only authentic medical documents can be confirmed.'
+
   onProgress?.({ status: 'OCR Extraction Complete!', progress: 100 })
 
   return {
     rawText,
-    documentType: docIntel.documentType || (allMedications.length ? 'Prescription' : 'Medical Record'),
-    documentCategory: docIntel.documentType || 'Medical Record',
-    classificationConfidence: rawText ? (docIntel.classificationConfidence || 0.90) : 0,
+    isValidMedicalDocument,
+    validationError,
+    documentType: isValidMedicalDocument ? (docIntel.documentType || (allMedications.length ? 'Prescription' : 'Medical Record')) : 'Unrecognized Non-Medical Document',
+    documentCategory: isValidMedicalDocument ? (docIntel.documentType || 'Medical Record') : 'Invalid Image / Art Print',
+    classificationConfidence: isValidMedicalDocument ? (docIntel.classificationConfidence || 0.90) : 0,
     documentDate: extractDocumentDate(rawText) || new Date().toISOString().split('T')[0],
-    doctorInfo: rxParsed.doctorInfo.name ? rxParsed.doctorInfo : null,
+    doctorInfo: rxParsed.doctorInfo.name || rxParsed.doctorInfo.clinicName ? rxParsed.doctorInfo : null,
     patientInfo: rxParsed.patientInfo.name ? rxParsed.patientInfo : null,
     stampAndSignature: docIntel.stampAndSignature || {
       detected: false,
@@ -417,7 +501,7 @@ export async function scanMedicalDocument(imageSource, onProgress) {
       advice: allAdvice,
     },
     drugInteractions: detectedInteractions,
-    confidence: rawText ? Math.max(confidence, docIntel.classificationConfidence || 0.85) : 0,
+    confidence: isValidMedicalDocument ? Math.max(confidence, docIntel.classificationConfidence || 0.85) : 0.0,
     parsedAt: new Date().toISOString(),
   }
 }

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowRight, ArrowLeft, Heart, MessageCircle, Volume2, VolumeX, Sun,
   LogOut, FormInput, ListFilter, CheckSquare, Square, Calendar, Hash, Sparkles,
-  Stethoscope, Leaf, Activity, Zap, RefreshCw
+  Stethoscope, Leaf, Activity, Zap, RefreshCw, AlertTriangle, RotateCcw, Edit3
 } from 'lucide-react'
 import Button from '../../components/Button'
 import Card from '../../components/Card'
@@ -72,6 +72,7 @@ export default function InterviewScreen() {
   // Conversational Voice AI Modal & Red-Flag States
   const [showConversationalModal, setShowConversationalModal] = useState(false)
   const [acknowledgedRedFlags, setAcknowledgedRedFlags] = useState([])
+  const [contradictionAlert, setContradictionAlert] = useState(null)
 
   // Evaluate real-time Red Flags across current responses
   const redFlagEvaluation = useMemo(() => {
@@ -378,6 +379,26 @@ export default function InterviewScreen() {
     else if (currentQuestion.type === 'dropdown' || currentQuestion.type === 'select') value = dropdownValue
     else if (currentQuestion.type === 'date') value = dateValue
 
+    // Clinical Logic Contradiction Check for surgical details
+    if (currentQuestion.id === 'surgical_details') {
+      const cleanInput = String(value || textInput || transcript || '').trim().toLowerCase()
+      const isNegative = /^(no|none|nahi|na|nhi|nothing|nil|never|n\/a|not having|no surgery|kuch nahi|koi nahi|koi nahi hai|n)$/i.test(cleanInput)
+      
+      const pastSurgResp = responses.find(r => r.questionId === 'past_surgical')
+      const hasSurgerySelected = pastSurgResp && (
+        (Array.isArray(pastSurgResp.structuredValue) && pastSurgResp.structuredValue.length > 0 && !pastSurgResp.structuredValue.includes('none')) ||
+        (typeof pastSurgResp.structuredValue === 'string' && pastSurgResp.structuredValue !== 'none' && pastSurgResp.structuredValue !== '' && !pastSurgResp.structuredValue.toLowerCase().includes('none'))
+      )
+
+      if (hasSurgerySelected && isNegative) {
+        setContradictionAlert({
+          title: t('contradictionTitle', 'Contradiction Detected: Surgery Details'),
+          message: t('contradictionMsg', 'You previously selected having had a prior surgery. Answering "No" or "None" contradicts your previous response. Please enter the approximate year / hospital (e.g., "2019 at District Hospital") or update your previous answer if you have not had surgery.'),
+        })
+        return
+      }
+    }
+
     submitResponse(currentQuestion.id, textInput || transcript, value, 'touch')
     setTextInput('')
     setNumberInput('')
@@ -385,6 +406,13 @@ export default function InterviewScreen() {
     setDropdownValue('')
     setDateValue('')
     nextQuestion()
+  }
+
+  const handleResolveContradictionNoSurgery = () => {
+    submitResponse('past_surgical', 'No Prior Surgeries', ['none'], 'touch')
+    setContradictionAlert(null)
+    setTextInput('')
+    setTimeout(nextQuestion, 150)
   }
 
   const handleComplaintSelect = (complaintId) => {
@@ -862,6 +890,57 @@ export default function InterviewScreen() {
           }
         }}
       />
+
+      {/* Logical Contradiction Alert Modal */}
+      {contradictionAlert && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-amber-200 text-left space-y-4"
+          >
+            <div className="flex items-start gap-3">
+              <div className="size-11 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 border border-amber-200">
+                <AlertTriangle className="size-6 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-slate-900 font-heading">
+                  {contradictionAlert.title}
+                </h3>
+                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                  {contradictionAlert.message}
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3.5 bg-amber-50/80 rounded-2xl border border-amber-200 text-xs text-amber-900 space-y-1">
+              <p className="font-bold">Why is this blocked?</p>
+              <p className="text-amber-800 leading-normal">
+                Clinical documentation requires consistency. If a surgery occurred, doctors need the approximate timeline or procedure. If no surgery occurred, please update the previous answer.
+              </p>
+            </div>
+
+            <div className="pt-2 flex flex-col sm:flex-row gap-2.5 justify-end">
+              <button
+                type="button"
+                onClick={handleResolveContradictionNoSurgery}
+                className="px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-xs font-bold text-slate-700 transition cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <RotateCcw className="size-3.5" />
+                <span>Change to "No Surgeries"</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setContradictionAlert(null)}
+                className="px-4 py-2.5 rounded-xl bg-[#174ea6] hover:bg-[#123b79] text-xs font-bold text-white transition cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <Edit3 className="size-3.5" />
+                <span>Enter Surgery Details</span>
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </BionicKioskShell>
   )
 }
