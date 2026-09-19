@@ -52,7 +52,7 @@ export default function DemoPage() {
   }
 
   return (
-    <div className="kiosk-canvas min-h-screen text-slate-900 pb-28 overflow-y-auto">
+    <div className="kiosk-canvas min-h-screen text-slate-900 pb-28 overflow-y-auto select-none">
       {/* ── Top Frosted Glass Navbar ── */}
       <header className="glass-card sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-md px-4 sm:px-8 py-3.5 shadow-xs">
         <nav className="flex items-center justify-between max-w-7xl mx-auto">
@@ -66,7 +66,7 @@ export default function DemoPage() {
             </div>
             <div>
               <span className="font-heading text-lg sm:text-xl font-black tracking-tight text-slate-900 block leading-tight">
-                ArogyaDarpan
+                {t('appName', 'ArogyaDarpan')}
               </span>
               <span className="text-[10px] font-bold text-slate-400 font-mono">
                 Interactive Testing Suite • SIH 2026
@@ -82,21 +82,21 @@ export default function DemoPage() {
               className="glass-pill px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:text-slate-950 border border-slate-200 hover:bg-slate-50 transition cursor-pointer flex items-center gap-1.5"
             >
               <Activity className="size-3.5 text-cobalt" />
-              <span>MediKiosk View</span>
+              <span>{t('medikioskView', 'MediKiosk View')}</span>
             </button>
             <button
               onClick={() => navigate('/doctor')}
               className="glass-pill px-3.5 py-1.5 text-xs font-bold text-slate-600 hover:text-cobalt border border-slate-200 transition cursor-pointer hidden sm:flex items-center gap-1.5"
             >
               <Stethoscope className="size-3.5 text-emerald" />
-              <span>Doctor Portal</span>
+              <span>{t('doctorPortal', 'Doctor Portal')}</span>
             </button>
             <button
               onClick={() => navigate('/')}
               className="btn-bionic-outline px-3.5 py-1.5 text-xs font-bold flex items-center gap-1.5"
             >
               <ArrowLeft className="size-3.5" />
-              <span>Home</span>
+              <span>{t('home', 'Home')}</span>
             </button>
           </div>
         </nav>
@@ -109,7 +109,7 @@ export default function DemoPage() {
           <motion.div custom={0} variants={fadeInUp} className="inline-flex items-center gap-2">
             <span className="status-chip bg-cobalt-soft text-cobalt border border-cobalt/20 py-1 px-3.5 text-xs font-bold shadow-xs">
               <Sparkles className="size-3.5 mr-1 text-cobalt" />
-              Pre-loaded Clinical Evaluation Scenarios
+              {t('preloadedScenarios', 'Pre-loaded Clinical Evaluation Scenarios')}
             </span>
           </motion.div>
 
@@ -119,10 +119,7 @@ export default function DemoPage() {
             variants={fadeInUp}
             className="font-heading text-4xl sm:text-5xl font-black text-slate-900 tracking-tight"
           >
-            Quick Clinical{' '}
-            <span className="rounded-2xl bg-lime px-4 py-0.5 text-lime-ink inline-block shadow-xs">
-              Demo
-            </span>
+            {t('quickClinicalDemo', 'Quick Clinical Demo')}
           </motion.h1>
 
           {/* Subtitle */}
@@ -131,8 +128,7 @@ export default function DemoPage() {
             variants={fadeInUp}
             className="text-sm sm:text-base text-slate-600 max-w-xl mx-auto font-medium leading-relaxed"
           >
-            Choose a clinical track to test ArogyaDarpan's conversational triage,
-            handwritten prescription OCR, and physician decision workbench.
+            {t('demoSubtitle', "Choose a clinical track to test ArogyaDarpan's conversational triage, handwritten prescription OCR, and physician decision workbench.")}
           </motion.p>
         </motion.div>
 
@@ -149,19 +145,17 @@ export default function DemoPage() {
               <div className="flex items-center gap-2">
                 <span className="status-chip bg-emerald-soft text-emerald font-bold border border-emerald/20 flex items-center gap-1">
                   <Zap className="size-3.5 fill-current" />
-                  GOLDEN DEMO PATH • RECOMMENDED
+                  {t('goldenPathBadge', 'GOLDEN DEMO PATH • RECOMMENDED')}
                 </span>
-                <span className="text-xs font-mono text-slate-400">1-Click Automated Setup</span>
+                <span className="text-xs font-mono text-slate-400">{t('oneClickSetup', '1-Click Automated Setup')}</span>
               </div>
 
               <h2 className="font-heading text-2xl font-black text-slate-900">
-                End-to-End Patient Kiosk to Doctor Review
+                {t('goldenPathTitle', 'End-to-End Patient Kiosk to Doctor Review')}
               </h2>
 
               <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
-                Automatically logs in as <strong>Rahul Sharma (46y / M)</strong>, launches the 
-                <strong> MediKiosk Conditions Screen</strong>, connects with live telemetry,
-                and synchronizes prescription OCR with the attending physician.
+                {t('goldenPathDesc', 'Automatically logs in as Rahul Sharma (46y / M), launches the MediKiosk Conditions Screen, connects with live telemetry, and synchronizes prescription OCR with the attending physician.')}
               </p>
 
               <div className="flex flex-wrap gap-2 pt-2 text-[11px] font-bold text-slate-600">
@@ -183,11 +177,11 @@ export default function DemoPage() {
                 className="btn-bionic px-7 py-4 rounded-full text-white font-bold text-xs sm:text-sm shadow-cobalt flex items-center justify-center gap-2.5 hover:scale-105 active:scale-98 transition-all cursor-pointer"
               >
                 <Play className="size-4 fill-white" />
-                <span>Start Golden Path Demo</span>
+                <span>{t('startGoldenDemo', 'Start Golden Path Demo')}</span>
                 <ArrowRight className="size-4" />
               </button>
               <span className="text-[10px] text-center text-slate-400 font-mono">
-                Launches MediKiosk Console
+                {t('launchKioskOverview', 'Launches MediKiosk Console')}
               </span>
             </div>
           </div>
@@ -207,16 +201,15 @@ export default function DemoPage() {
                   <User className="size-6" />
                 </div>
                 <span className="status-chip bg-slate-100 text-slate-700 font-bold text-[10px]">
-                  PATIENT PORTAL
+                  {t('patientPortalTitle', 'PATIENT PORTAL')}
                 </span>
               </div>
 
               <h3 className="font-heading text-xl font-black text-slate-900 mb-1.5">
-                Patient MediKiosk Journey
+                {t('patientKioskJourney', 'Patient MediKiosk Journey')}
               </h3>
               <p className="text-xs text-slate-600 font-medium leading-relaxed mb-4">
-                Experience the patient intake flow from regional language selection, ABHA identification,
-                to real-time medical OCR analysis.
+                {t('patientKioskDesc', 'Experience the patient intake flow from regional language selection, ABHA identification, to real-time medical OCR analysis.')}
               </p>
 
               <div className="space-y-2 p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 text-xs font-medium text-slate-700 mb-6">
@@ -244,15 +237,8 @@ export default function DemoPage() {
                 onClick={handleStartPatientDemo}
                 className="btn-bionic w-full py-3.5 rounded-full text-white font-bold text-xs shadow-cobalt flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>Launch MediKiosk Overview</span>
+                <span>{t('launchKioskOverview', 'Launch MediKiosk Overview')}</span>
                 <ArrowRight className="size-4" />
-              </button>
-              <button
-                onClick={() => navigate('/patient/interview')}
-                className="btn-bionic-outline w-full py-2.5 rounded-full text-xs font-bold text-slate-700 flex items-center justify-center gap-1.5"
-              >
-                <span>Direct to AI Clinical Interview</span>
-                <ChevronRight className="size-3.5" />
               </button>
             </div>
           </motion.div>
@@ -269,16 +255,15 @@ export default function DemoPage() {
                   <Stethoscope className="size-6" />
                 </div>
                 <span className="status-chip bg-emerald-soft text-emerald font-bold text-[10px]">
-                  PHYSICIAN WORKBENCH
+                  {t('doctorWorkbench', 'PHYSICIAN WORKBENCH')}
                 </span>
               </div>
 
               <h3 className="font-heading text-xl font-black text-slate-900 mb-1.5">
-                Doctor Review Dashboard
+                {t('doctorWorkbench', 'Doctor Review Dashboard')}
               </h3>
               <p className="text-xs text-slate-600 font-medium leading-relaxed mb-4">
-                See how clinicians review AI-prepared health dossiers, check biomarker flags,
-                and inspect potential drug-drug interactions.
+                {t('doctorWorkbenchDesc', 'See how clinicians review AI-prepared health dossiers, check biomarker flags, and inspect potential drug-drug interactions.')}
               </p>
 
               <div className="space-y-2 p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 text-xs font-medium text-slate-700 mb-6">
@@ -306,15 +291,8 @@ export default function DemoPage() {
                 onClick={() => navigate('/doctor')}
                 className="btn-bionic w-full py-3.5 rounded-full text-white font-bold text-xs shadow-cobalt flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>Launch Physician Workbench</span>
+                <span>{t('openDoctorConsole', 'Launch Physician Workbench')}</span>
                 <ArrowRight className="size-4" />
-              </button>
-              <button
-                onClick={() => navigate('/doctor/patient/pt_00291')}
-                className="btn-bionic-outline w-full py-2.5 rounded-full text-xs font-bold text-slate-700 flex items-center justify-center gap-1.5"
-              >
-                <span>Inspect Rahul Sharma's Dossier</span>
-                <ChevronRight className="size-3.5" />
               </button>
             </div>
           </motion.div>
@@ -331,28 +309,28 @@ export default function DemoPage() {
               className="p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 flex flex-col items-center gap-1.5 text-slate-800 font-bold transition cursor-pointer"
             >
               <Activity className="size-5 text-cobalt" />
-              <span>MediKiosk Overview</span>
+              <span>{t('medikioskView', 'MediKiosk Overview')}</span>
             </button>
             <button
               onClick={() => navigate('/patient/documents')}
               className="p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 flex flex-col items-center gap-1.5 text-slate-800 font-bold transition cursor-pointer"
             >
               <FileText className="size-5 text-cobalt" />
-              <span>Medical OCR Scanner</span>
+              <span>{t('ocrScan', 'Medical OCR Scanner')}</span>
             </button>
             <button
               onClick={() => navigate('/patient/document-review')}
               className="p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 flex flex-col items-center gap-1.5 text-slate-800 font-bold transition cursor-pointer"
             >
               <History className="size-5 text-cobalt" />
-              <span>Health Timeline</span>
+              <span>{t('timeline', 'Health Timeline')}</span>
             </button>
             <button
               onClick={() => navigate('/doctor')}
               className="p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 flex flex-col items-center gap-1.5 text-slate-800 font-bold transition cursor-pointer"
             >
               <Stethoscope className="size-5 text-emerald" />
-              <span>Doctor Console</span>
+              <span>{t('doctorConsole', 'Doctor Console')}</span>
             </button>
           </div>
         </div>
@@ -364,7 +342,7 @@ export default function DemoPage() {
             className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-cobalt transition-colors cursor-pointer py-2 px-4 rounded-full hover:bg-white"
           >
             <ArrowLeft className="size-3.5" />
-            <span>Return to ArogyaDarpan Portal Home</span>
+            <span>{t('home', 'Return to ArogyaDarpan Portal Home')}</span>
           </button>
         </div>
       </main>

@@ -24,18 +24,12 @@ import ArogyaDarpanLogo from '../../components/ArogyaDarpanLogo'
 import { getDemoPatient } from '../../data/demoPatients'
 import { prepareFHIRBundle } from '../../services/abdmService'
 import { generateDifferentialDiagnosis } from '../../services/differentialEngine'
-
-const tabs = [
-  { id: 'summary', label: 'Structured Summary', icon: ClipboardList },
-  { id: 'ayush', label: 'Dashavidha Pariksha', icon: Leaf },
-  { id: 'timeline', label: 'Timeline', icon: Clock },
-  { id: 'documents', label: 'OCR Records', icon: FileText },
-  { id: 'interview', label: 'Intake Transcript', icon: Users },
-]
+import { useLanguage } from '../../context/LanguageContext'
 
 export default function PatientDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { t, lang } = useLanguage()
   const [activeTab, setActiveTab] = useState('summary')
   const [sectionStatuses, setSectionStatuses] = useState({})
   const [acceptedICD, setAcceptedICD] = useState(null)
@@ -75,6 +69,14 @@ export default function PatientDetail() {
 
   // AI Differential Diagnoses Generator
   const differentials = useMemo(() => generateDifferentialDiagnosis(patient), [patient])
+
+  const tabs = [
+    { id: 'summary', label: t('structuredSummary', 'Structured Summary'), icon: ClipboardList },
+    { id: 'ayush', label: t('dashavidhaPariksha', 'Dashavidha Pariksha'), icon: Leaf },
+    { id: 'timeline', label: t('timeline', 'Timeline'), icon: Clock },
+    { id: 'documents', label: t('ocrRecords', 'OCR Records'), icon: FileText },
+    { id: 'interview', label: t('intakeTranscript', 'Intake Transcript'), icon: Users },
+  ]
 
   const handleVerify = (section) => {
     setSectionStatuses(prev => ({ ...prev, [section]: 'doctor_confirmed' }))
@@ -223,7 +225,7 @@ export default function PatientDetail() {
             <button
               onClick={() => navigate('/doctor')}
               className="p-2 rounded-xl bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-[#174ea6] transition cursor-pointer"
-              title="Back to Dashboard"
+              title={t('back', 'Back')}
             >
               <ArrowLeft className="size-4" />
             </button>
@@ -231,12 +233,14 @@ export default function PatientDetail() {
               <ArogyaDarpanLogo size="sm" />
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-heading font-black text-[#123b79] text-base">ArogyaDarpan</span>
+                  <span className="font-heading font-black text-[#123b79] text-base">{t('appName', 'ArogyaDarpan')}</span>
                   <span className="px-2 py-0.5 rounded-full bg-blue-50 text-[#174ea6] font-mono text-[10px] font-bold border border-blue-200/80">
-                    Clinical Decision Station
+                    {t('clinicalDecisionStation', 'Clinical Decision Station')}
                   </span>
                 </div>
-                <span className="text-[11px] text-slate-500 font-medium">Dr. Ananya Sharma • OPD Room 204</span>
+                <span className="text-[11px] text-slate-500 font-medium">
+                  {t('doctorNameOpd', 'Dr. Ananya Sharma • OPD Room 204')}
+                </span>
               </div>
             </div>
           </div>
@@ -247,14 +251,14 @@ export default function PatientDetail() {
               className="px-3.5 py-1.5 rounded-xl border border-blue-200 bg-white text-xs font-mono font-bold text-[#174ea6] hover:bg-blue-50 transition cursor-pointer flex items-center gap-1.5 shadow-2xs"
             >
               <Code className="size-3.5 text-[#174ea6]" />
-              <span className="hidden sm:inline">FHIR Bundle JSON</span>
+              <span className="hidden sm:inline">{t('fhirBundleJson', 'FHIR Bundle JSON')}</span>
             </button>
             <button
               onClick={() => setFhirModalOpen(true)}
               className="px-4 py-1.5 rounded-xl bg-[#174ea6] hover:bg-[#123b79] text-white text-xs font-heading font-bold shadow-sm shadow-blue-800/25 transition cursor-pointer flex items-center gap-1.5"
             >
               <Download className="size-3.5" />
-              <span>Export ABDM</span>
+              <span>{t('exportAbdm', 'Export ABDM')}</span>
             </button>
           </div>
         </div>
@@ -299,7 +303,7 @@ export default function PatientDetail() {
                       </div>
                       <div className="flex items-center gap-1 text-[11px] font-mono text-slate-500 mt-0.5">
                         <span className="material-symbols-outlined text-[13px] text-[#174ea6]">badge</span>
-                        <span>ABHA: {patient.abhaId || '91-8842-1920-4491'}</span>
+                        <span>{t('abhaIdentity', 'ABHA')}: {patient.abhaId || '91-8842-1920-4491'}</span>
                       </div>
                     </div>
                   </div>
@@ -318,15 +322,15 @@ export default function PatientDetail() {
                   <div className="flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[16px] text-red-600 animate-pulse">emergency</span>
                     <span className="font-heading font-bold text-xs text-red-800 tracking-tight">
-                      Critical Diagnostic Flags
+                      {t('criticalDiagnosticFlags', 'Critical Diagnostic Flags')}
                     </span>
                   </div>
                   <div className="flex flex-col gap-1 pl-5 text-[11px]">
                     <p className="font-medium text-slate-800">
-                      <span className="text-red-600 font-bold">Red Flag:</span> Acute retrosternal chest pain with left arm radiation.
+                      <span className="text-red-600 font-bold">{t('redFlagPrefix', 'Red Flag:')}</span> Acute retrosternal chest pain with left arm radiation.
                     </p>
                     <p className="font-medium text-slate-800">
-                      <span className="text-amber-600 font-bold">Conflict:</span> Penicillin allergy discrepancy between OCR (Allergic) & Voice Intake (None reported).
+                      <span className="text-amber-600 font-bold">{t('conflictPrefix', 'Conflict:')}</span> Penicillin allergy discrepancy between OCR (Allergic) & Voice Intake (None reported).
                     </p>
                   </div>
                 </div>
@@ -338,10 +342,10 @@ export default function PatientDetail() {
               {/* Triage Signals */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between px-1">
-                  <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider">
-                    Clinical Priority Signals ({clinicalSignals.length})
+                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    {t('clinicalPrioritySignals', 'Clinical Priority Signals')} ({clinicalSignals.length})
                   </h3>
-                  <span className="text-[10px] text-primary-600 font-semibold">Rules Engine</span>
+                  <span className="text-[10px] text-[#174ea6] font-semibold">{t('rulesEngine', 'Rules Engine')}</span>
                 </div>
 
                 {clinicalSignals.map((signal, i) => (
@@ -369,8 +373,8 @@ export default function PatientDetail() {
 
             {acceptedICD && (
               <div className="bg-emerald-50 rounded-2xl border border-emerald-200 p-4 flex items-center justify-between text-xs text-emerald-900">
-                <span className="font-bold">✓ Doctor Accepted Diagnosis: ICD {acceptedICD.icdCode} — {acceptedICD.disease}</span>
-                <Badge severity="success" size="sm">EHR Populated</Badge>
+                <span className="font-bold">✓ {t('doctorAcceptedDiag', 'Doctor Accepted Diagnosis:')} ICD {acceptedICD.icdCode} — {acceptedICD.disease}</span>
+                <Badge severity="success" size="sm">{t('ehrPopulated', 'EHR Populated')}</Badge>
               </div>
             )}
 
@@ -405,36 +409,36 @@ export default function PatientDetail() {
               {activeTab === 'summary' && (
                 <div className="space-y-4">
                   {/* Status Banner */}
-                  <Card padding="px-6 py-4" className="flex items-center justify-between border-l-4 border-l-primary-500">
+                  <Card padding="px-6 py-4" className="flex items-center justify-between border-l-4 border-l-[#174ea6]">
                     <div>
-                      <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">SIH Compliant History Format</span>
-                      <h3 className="font-bold text-text-primary text-base font-heading">
-                        Pre-Consultation Clinical Intake Draft
+                      <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('sihCompliantFormat', 'SIH Compliant History Format')}</span>
+                      <h3 className="font-bold text-slate-900 text-base font-heading">
+                        {t('preConsultDraft', 'Pre-Consultation Clinical Intake Draft')}
                       </h3>
                     </div>
                     <Badge severity="success" dot size="md">
-                      Draft Ready for Physician Verification
+                      {t('draftReadyVerify', 'Draft Ready for Physician Verification')}
                     </Badge>
                   </Card>
 
                   {/* 1. Chief Complaint */}
                   <SummarySection
-                    title="1. Chief Complaint"
+                    title={t('chiefComplaintSection', '1. Chief Complaint')}
                     content={summaryData.chiefComplaint}
                     source="Patient ASR / Touch Intake"
                     status={sectionStatuses.chiefComplaint}
                     onConfirm={() => handleVerify('chiefComplaint')}
-                    onEdit={() => handleOpenEdit('chiefComplaint', 'Chief Complaint', summaryData.chiefComplaint)}
+                    onEdit={() => handleOpenEdit('chiefComplaint', t('chiefComplaint', 'Chief Complaint'), summaryData.chiefComplaint)}
                     onReject={() => handleReject('chiefComplaint')}
-                    onViewSource={() => openEvidence('Chief Complaint', summaryData.chiefComplaint, 'Patient Voice Transcript', 'voice')}
+                    onViewSource={() => openEvidence(t('chiefComplaint', 'Chief Complaint'), summaryData.chiefComplaint, 'Patient Voice Transcript', 'voice')}
                   />
 
                   {/* 2. HPI — SOCRATES Framework Breakdown */}
                   <Card>
-                    <div className="flex items-center justify-between mb-3 border-b border-border-light pb-2">
-                      <h3 className="font-bold text-text-primary font-heading text-base flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-primary-500" />
-                        2. History of Present Illness (SOCRATES Framework)
+                    <div className="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+                      <h3 className="font-bold text-slate-900 font-heading text-base flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-[#174ea6]" />
+                        {t('hpiSocratesSection', '2. History of Present Illness (SOCRATES Framework)')}
                       </h3>
                       <VerificationButtons
                         status={sectionStatuses.hpi}
@@ -444,25 +448,25 @@ export default function PatientDetail() {
                       />
                     </div>
 
-                    <p className="text-sm text-text-secondary mb-4 leading-relaxed">{summaryData.hpi}</p>
+                    <p className="text-sm text-slate-600 mb-4 leading-relaxed">{summaryData.hpi}</p>
 
                     {/* SOCRATES Grid */}
-                    <div className="grid grid-cols-2 gap-2 text-xs bg-surface-muted p-3.5 rounded-xl border border-border-light">
-                      <div><span className="font-bold text-text-primary">Site:</span> {socrates.site}</div>
-                      <div><span className="font-bold text-text-primary">Onset:</span> {socrates.onset}</div>
-                      <div><span className="font-bold text-text-primary">Character:</span> {socrates.character}</div>
-                      <div><span className="font-bold text-text-primary">Radiation:</span> {socrates.radiation}</div>
-                      <div><span className="font-bold text-text-primary">Associations:</span> {socrates.associations}</div>
-                      <div><span className="font-bold text-text-primary">Time Course:</span> {socrates.timecourse}</div>
-                      <div><span className="font-bold text-text-primary">Exacerbating:</span> {socrates.exacerbating}</div>
-                      <div><span className="font-bold text-text-primary">Severity:</span> <span className="font-bold text-red-600">{socrates.severity}</span></div>
+                    <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-3.5 rounded-xl border border-slate-200/60">
+                      <div><span className="font-bold text-slate-900">{t('site', 'Site:')}</span> {socrates.site}</div>
+                      <div><span className="font-bold text-slate-900">{t('onset', 'Onset:')}</span> {socrates.onset}</div>
+                      <div><span className="font-bold text-slate-900">{t('character', 'Character:')}</span> {socrates.character}</div>
+                      <div><span className="font-bold text-slate-900">{t('radiation', 'Radiation:')}</span> {socrates.radiation}</div>
+                      <div><span className="font-bold text-slate-900">{t('associations', 'Associations:')}</span> {socrates.associations}</div>
+                      <div><span className="font-bold text-slate-900">{t('timeCourse', 'Time Course:')}</span> {socrates.timecourse}</div>
+                      <div><span className="font-bold text-slate-900">{t('exacerbating', 'Exacerbating:')}</span> {socrates.exacerbating}</div>
+                      <div><span className="font-bold text-slate-900">{t('severity', 'Severity:')}</span> <span className="font-bold text-red-600">{socrates.severity}</span></div>
                     </div>
                   </Card>
 
                   {/* 3. Past Medical & Surgical History */}
                   <Card>
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-bold text-text-primary font-heading text-base">3. Past Medical & Surgical History</h3>
+                      <h3 className="font-bold text-slate-900 font-heading text-base">{t('pastHistorySection', '3. Past Medical & Surgical History')}</h3>
                       <VerificationButtons
                         status={sectionStatuses.pastHistory}
                         onConfirm={() => handleVerify('pastHistory')}
@@ -472,23 +476,23 @@ export default function PatientDetail() {
                     </div>
                     {Array.isArray(summaryData.pastHistory) ? (
                       summaryData.pastHistory.map((item, i) => (
-                        <div key={i} className="flex items-center justify-between bg-surface-muted rounded-xl px-4 py-2.5 mb-2 text-sm">
-                          <span className="font-bold text-text-primary">{item.condition} (Since {item.since})</span>
-                          <button onClick={() => openEvidence(item.condition, `${item.condition} documented at District Hospital`, 'Discharge_Summary_2024.pdf', 'document')} className="text-xs text-primary-600 font-semibold hover:underline flex items-center gap-1 cursor-pointer">
-                            <Eye className="w-3.5 h-3.5" /> Source Document
+                        <div key={i} className="flex items-center justify-between bg-slate-50 rounded-xl px-4 py-2.5 mb-2 text-sm">
+                          <span className="font-bold text-slate-900">{item.condition} (Since {item.since})</span>
+                          <button onClick={() => openEvidence(item.condition, `${item.condition} documented at District Hospital`, 'Discharge_Summary_2024.pdf', 'document')} className="text-xs text-[#174ea6] font-semibold hover:underline flex items-center gap-1 cursor-pointer">
+                            <Eye className="w-3.5 h-3.5" /> {t('sourceDocument', 'Source Document')}
                           </button>
                         </div>
                       ))
                     ) : (
-                      <p className="text-sm text-text-secondary">{String(summaryData.pastHistory)}</p>
+                      <p className="text-sm text-slate-600">{String(summaryData.pastHistory)}</p>
                     )}
                   </Card>
 
                   {/* 4. Drug & Allergy History */}
                   <Card>
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-bold text-text-primary font-heading text-base flex items-center gap-2">
-                        <Pill className="w-4 h-4 text-primary-500" /> 4. Drug & Allergy History
+                      <h3 className="font-bold text-slate-900 font-heading text-base flex items-center gap-2">
+                        <Pill className="w-4 h-4 text-[#174ea6]" /> {t('drugAllergySection', '4. Drug & Allergy History')}
                       </h3>
                       <VerificationButtons
                         status={sectionStatuses.medications}
@@ -501,23 +505,23 @@ export default function PatientDetail() {
                     <div className="space-y-2 mb-3">
                       {Array.isArray(summaryData.medications) ? (
                         summaryData.medications.map((med, i) => (
-                          <div key={i} className="flex items-center justify-between bg-surface-muted rounded-xl px-4 py-2.5 text-sm">
+                          <div key={i} className="flex items-center justify-between bg-slate-50 rounded-xl px-4 py-2.5 text-sm">
                             <div>
-                              <span className="font-bold text-text-primary">{med.name}</span>
-                              <span className="text-xs text-text-muted ml-2">{med.frequency}</span>
+                              <span className="font-bold text-slate-900">{med.name}</span>
+                              <span className="text-xs text-slate-500 ml-2">{med.frequency}</span>
                             </div>
                             <ConfidenceBadge score={med.confidence || 0.96} />
                           </div>
                         ))
                       ) : (
-                        <p className="text-sm text-text-secondary">{String(summaryData.medications)}</p>
+                        <p className="text-sm text-slate-600">{String(summaryData.medications)}</p>
                       )}
                     </div>
 
                     {summaryData.allergies?.status === 'conflict' && (
                       <ClinicalSignalCard
                         severity="high"
-                        message="Allergy Information Conflict"
+                        message={t('allergyConflict', 'Allergy Information Conflict')}
                         currentValue={summaryData.allergies.currentResponse}
                         previousValue={summaryData.allergies.historicalRecord}
                       />
@@ -526,41 +530,19 @@ export default function PatientDetail() {
 
                   {/* 5. Family History */}
                   <SummarySection
-                    title="5. Family History"
+                    title={t('personalFamilySection', '5. Personal & Family History')}
                     content={summaryData.familyHistory || 'Father had coronary artery disease at age 52'}
+                    source="Patient Intake"
                     status={sectionStatuses.familyHistory}
                     onConfirm={() => handleVerify('familyHistory')}
                     onEdit={() => handleOpenEdit('familyHistory', 'Family History', summaryData.familyHistory || 'Father had coronary artery disease at age 52')}
                     onReject={() => handleReject('familyHistory')}
                   />
 
-                  {/* 6. Personal & Lifestyle History (Ahara-Vihara) */}
+                  {/* 6. Review of Systems (ROS) */}
                   <Card>
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-bold text-text-primary font-heading text-base">6. Personal & Lifestyle History (Ahara-Vihara)</h3>
-                      <VerificationButtons
-                        status={sectionStatuses.personalHistory}
-                        onConfirm={() => handleVerify('personalHistory')}
-                        onEdit={() => handleOpenEdit('personalHistory', 'Personal & Lifestyle History', summaryData.personalHistory || 'Smoking: Quit 2 years ago (Ex-smoker), Alcohol: Occasional, Diet: Mixed, Physical Activity: Moderate')}
-                        onReject={() => handleReject('personalHistory')}
-                      />
-                    </div>
-                    {typeof summaryData.personalHistory === 'string' ? (
-                      <p className="text-sm text-text-secondary leading-relaxed">{summaryData.personalHistory}</p>
-                    ) : (
-                      <div className="grid grid-cols-2 gap-3 text-xs bg-surface-muted p-3.5 rounded-xl">
-                        <div><span className="font-bold text-text-primary">Smoking:</span> Quit 2 years ago (Ex-smoker)</div>
-                        <div><span className="font-bold text-text-primary">Alcohol:</span> Occasional social use</div>
-                        <div><span className="font-bold text-text-primary">Ahara (Diet):</span> Mixed diet, irregular meal timings</div>
-                        <div><span className="font-bold text-text-primary">Vihara (Lifestyle):</span> Moderate physical activity, desk work</div>
-                      </div>
-                    )}
-                  </Card>
-
-                  {/* 7. Review of Systems (ROS) */}
-                  <Card>
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-bold text-text-primary font-heading text-base">7. Review of Systems (ROS)</h3>
+                      <h3 className="font-bold text-slate-900 font-heading text-base">{t('rosSection', '6. Review of Systems (ROS)')}</h3>
                       <VerificationButtons
                         status={sectionStatuses.ros}
                         onConfirm={() => handleVerify('ros')}
@@ -569,32 +551,32 @@ export default function PatientDetail() {
                       />
                     </div>
                     {typeof summaryData.ros === 'string' ? (
-                      <p className="text-sm text-text-secondary leading-relaxed">{summaryData.ros}</p>
+                      <p className="text-sm text-slate-600 leading-relaxed">{summaryData.ros}</p>
                     ) : (
                       <div className="space-y-2 text-xs">
-                        <div className="bg-surface-muted p-2.5 rounded-lg flex justify-between">
-                          <span className="font-bold text-text-primary">Cardiovascular:</span>
-                          <span className="text-text-secondary">Chest pain, exertional dyspnea, diaphoresis</span>
+                        <div className="bg-slate-50 p-2.5 rounded-lg flex justify-between">
+                          <span className="font-bold text-slate-900">Cardiovascular:</span>
+                          <span className="text-slate-600">Chest pain, exertional dyspnea, diaphoresis</span>
                         </div>
-                        <div className="bg-surface-muted p-2.5 rounded-lg flex justify-between">
-                          <span className="font-bold text-text-primary">Respiratory:</span>
-                          <span className="text-text-secondary">Shortness of breath on exertion; no chronic cough</span>
+                        <div className="bg-slate-50 p-2.5 rounded-lg flex justify-between">
+                          <span className="font-bold text-slate-900">Respiratory:</span>
+                          <span className="text-slate-600">Shortness of breath on exertion; no chronic cough</span>
                         </div>
                       </div>
                     )}
                   </Card>
 
-                  {/* 8. Prior Investigations Summary */}
+                  {/* 7. Prior Investigations Summary */}
                   {summaryData.investigations?.length > 0 && (
                     <Card>
-                      <h3 className="font-bold text-text-primary font-heading text-base flex items-center gap-2 mb-3">
-                        <FlaskConical className="w-4 h-4 text-purple-500" /> 8. Prior Investigations Summary
+                      <h3 className="font-bold text-slate-900 font-heading text-base flex items-center gap-2 mb-3">
+                        <FlaskConical className="w-4 h-4 text-purple-500" /> {t('vitalsTelemetrySection', '7. Pre-Consultation Vitals & Telemetry')}
                       </h3>
                       {summaryData.investigations.map((inv, i) => (
-                        <div key={i} className="flex items-center justify-between bg-surface-muted rounded-xl px-4 py-2.5 mb-2 text-sm">
+                        <div key={i} className="flex items-center justify-between bg-slate-50 rounded-xl px-4 py-2.5 mb-2 text-sm">
                           <div>
-                            <span className="font-bold text-text-primary">{inv.name}: {inv.value}</span>
-                            <span className="text-xs text-text-muted ml-2">({inv.date})</span>
+                            <span className="font-bold text-slate-900">{inv.name}: {inv.value}</span>
+                            <span className="text-xs text-slate-500 ml-2">({inv.date})</span>
                           </div>
                           <Badge severity={inv.status === 'abnormal' ? 'medium' : 'success'} size="sm">
                             {inv.status === 'abnormal' ? 'Abnormal' : 'Normal'}
@@ -604,7 +586,7 @@ export default function PatientDetail() {
                     </Card>
                   )}
 
-                  {/* 9. Physician Clinical Notes, Orders & Rx Plan */}
+                  {/* 8. Physician Clinical Notes, Orders & Rx Plan */}
                   <Card className="border-2 border-blue-200 shadow-sm bg-gradient-to-br from-white via-blue-50/20 to-blue-50/40">
                     <div className="flex items-center justify-between mb-4 pb-3 border-b border-blue-100">
                       <div className="flex items-center gap-2.5">
@@ -613,7 +595,7 @@ export default function PatientDetail() {
                         </div>
                         <div>
                           <h3 className="font-bold text-slate-900 font-heading text-base">
-                            Physician Clinical Notes, Orders & Prescription Plan
+                            {t('physicianOrdersSection', '8. Physician Orders & Clinical Prescription')}
                           </h3>
                           <p className="text-xs text-slate-500">ABDM Practitioner Direct EHR Entry</p>
                         </div>
@@ -632,7 +614,7 @@ export default function PatientDetail() {
                     <div className="space-y-4">
                       {/* Final Clinical Diagnosis */}
                       <div>
-                        <label className="text-xs font-bold text-text-secondary block mb-1">
+                        <label className="text-xs font-bold text-slate-600 block mb-1">
                           Final Confirmed Diagnosis / Clinical Impression
                         </label>
                         <input
@@ -640,40 +622,40 @@ export default function PatientDetail() {
                           value={physicianOrders.diagnosis}
                           onChange={(e) => setPhysicianOrders(prev => ({ ...prev, diagnosis: e.target.value }))}
                           placeholder={acceptedICD ? `ICD ${acceptedICD.icdCode} — ${acceptedICD.disease}` : "e.g. Unstable Angina (ICD-10 I20.0) / Acute Coronary Syndrome"}
-                          className="w-full px-3.5 py-2.5 rounded-xl border border-border-light bg-surface-raised text-sm font-medium text-text-primary focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-medium text-slate-900 focus:ring-2 focus:ring-[#174ea6]"
                         />
                       </div>
 
                       {/* Rx Medications */}
                       <div>
                         <div className="flex items-center justify-between mb-1">
-                          <label className="text-xs font-bold text-text-secondary flex items-center gap-1.5">
-                            <Pill className="w-3.5 h-3.5 text-primary-600" /> Prescribed Medications (Rx)
+                          <label className="text-xs font-bold text-slate-600 flex items-center gap-1.5">
+                            <Pill className="w-3.5 h-3.5 text-[#174ea6]" /> Prescribed Medications (Rx)
                           </label>
                           <button
                             type="button"
                             onClick={handleAddPrescriptionItem}
-                            className="text-xs text-primary-600 font-semibold hover:underline cursor-pointer flex items-center gap-1"
+                            className="text-xs text-[#174ea6] font-semibold hover:underline cursor-pointer flex items-center gap-1"
                           >
                             <Plus className="w-3 h-3" /> Add Drug
                           </button>
                         </div>
                         <div className="space-y-2">
                           {physicianOrders.medications.map((med, idx) => (
-                            <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-2 bg-surface-raised p-2.5 rounded-xl border border-border-light text-xs">
+                            <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-2 bg-white p-2.5 rounded-xl border border-slate-200 text-xs">
                               <input
                                 type="text"
                                 value={med.name}
                                 onChange={(e) => handleUpdateMed(idx, 'name', e.target.value)}
                                 placeholder="Drug Name & Strength"
-                                className="w-full sm:flex-1 font-bold text-text-primary bg-transparent focus:outline-none"
+                                className="w-full sm:flex-1 font-bold text-slate-900 bg-transparent focus:outline-none"
                               />
                               <input
                                 type="text"
                                 value={med.instructions}
                                 onChange={(e) => handleUpdateMed(idx, 'instructions', e.target.value)}
                                 placeholder="Dosage & Timing"
-                                className="w-full sm:flex-1 text-text-secondary bg-transparent focus:outline-none"
+                                className="w-full sm:flex-1 text-slate-600 bg-transparent focus:outline-none"
                               />
                               <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
                                 <input
@@ -681,12 +663,12 @@ export default function PatientDetail() {
                                   value={med.duration}
                                   onChange={(e) => handleUpdateMed(idx, 'duration', e.target.value)}
                                   placeholder="Duration"
-                                  className="w-24 text-text-muted bg-transparent focus:outline-none text-left sm:text-right"
+                                  className="w-24 text-slate-400 bg-transparent focus:outline-none text-left sm:text-right"
                                 />
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveMed(idx)}
-                                  className="text-text-muted hover:text-red-500 cursor-pointer p-1"
+                                  className="text-slate-400 hover:text-red-500 cursor-pointer p-1"
                                 >
                                   <X className="w-3.5 h-3.5" />
                                 </button>
@@ -699,7 +681,7 @@ export default function PatientDetail() {
                       {/* Diagnostic & Lab Orders */}
                       <div>
                         <div className="flex items-center justify-between mb-1">
-                          <label className="text-xs font-bold text-text-secondary flex items-center gap-1.5">
+                          <label className="text-xs font-bold text-slate-600 flex items-center gap-1.5">
                             <FlaskConical className="w-3.5 h-3.5 text-purple-600" /> Diagnostic & Lab Requisitions
                           </label>
                         </div>
@@ -716,14 +698,14 @@ export default function PatientDetail() {
                             type="text"
                             onKeyDown={handleAddLab}
                             placeholder="+ Type order and press Enter"
-                            className="text-xs px-3 py-1 rounded-lg border border-dashed border-border-light bg-surface-raised focus:outline-none focus:ring-1 focus:ring-primary-500 w-56"
+                            className="text-xs px-3 py-1 rounded-lg border border-dashed border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#174ea6] w-56"
                           />
                         </div>
                       </div>
 
                       {/* Clinical Notes & Follow-up */}
                       <div>
-                        <label className="text-xs font-bold text-text-secondary block mb-1">
+                        <label className="text-xs font-bold text-slate-600 block mb-1">
                           Physician Notes & Clinical Advice
                         </label>
                         <textarea
@@ -731,14 +713,14 @@ export default function PatientDetail() {
                           value={physicianOrders.clinicalNotes}
                           onChange={(e) => setPhysicianOrders(prev => ({ ...prev, clinicalNotes: e.target.value }))}
                           placeholder="Admission in cardiac day care advised; urgent coronary angiography scheduled; lifestyle moderation..."
-                          className="w-full px-3.5 py-2.5 rounded-xl border border-border-light bg-surface-raised text-sm text-text-primary focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 focus:ring-2 focus:ring-[#174ea6]"
                         />
                       </div>
 
                       {/* Sign and Finalize Button */}
-                      <div className="flex items-center justify-between pt-3 border-t border-border-light">
-                        <span className="text-xs text-text-muted">
-                          Directly links to ABDM Health Information Exchange (HIE-CM).
+                      <div className="flex items-center justify-between pt-3 border-t border-slate-200">
+                        <span className="text-xs text-slate-400">
+                          {t('pushSignedAbdm', 'Push Signed Record to ABDM Health Locker')}
                         </span>
                         <Button
                           variant={physicianOrders.isSigned ? 'success' : 'primary'}
@@ -746,7 +728,7 @@ export default function PatientDetail() {
                           icon={Check}
                           onClick={handleSignConsultation}
                         >
-                          {physicianOrders.isSigned ? '✓ Signed & Finalized' : 'Sign & Complete Consultation'}
+                          {physicianOrders.isSigned ? `✓ ${t('confirmed', 'Verified')}` : t('signFinalize', 'Sign & Finalize Consultation')}
                         </Button>
                       </div>
                     </div>
@@ -757,14 +739,14 @@ export default function PatientDetail() {
               {/* DASHAVIDHA PARIKSHA (AYUSH TAB) */}
               {activeTab === 'ayush' && (
                 <Card>
-                  <div className="flex items-center justify-between mb-6 pb-3 border-b border-border-light">
+                  <div className="flex items-center justify-between mb-6 pb-3 border-b border-slate-200">
                     <div className="flex items-center gap-2.5">
                       <Leaf className="w-6 h-6 text-emerald-600" />
                       <div>
-                        <h3 className="font-bold text-text-primary text-lg font-heading">
-                          Dashavidha Pariksha (10-Fold Ayurvedic Assessment)
+                        <h3 className="font-bold text-slate-900 text-lg font-heading">
+                          {t('dashavidhaPariksha', 'Dashavidha Pariksha')} (10-Fold Ayurvedic Assessment)
                         </h3>
-                        <p className="text-xs text-text-muted">AIIA / Ministry of Ayush Clinical Protocol</p>
+                        <p className="text-xs text-slate-500">AIIA / Ministry of Ayush Clinical Protocol</p>
                       </div>
                     </div>
                     <Badge severity="success" dot size="sm">AYUSH Validated</Badge>
@@ -779,37 +761,37 @@ export default function PatientDetail() {
                       <span className="font-bold text-emerald-900 block mb-1">2. Vikriti (Current Imbalance):</span>
                       <p className="text-emerald-800">{dashavidha.vikriti}</p>
                     </div>
-                    <div className="bg-surface-muted p-3.5 rounded-xl border border-border-light">
-                      <span className="font-bold text-text-primary block mb-1">3. Sara (Tissue Excellence):</span>
-                      <p className="text-text-secondary">{dashavidha.sara}</p>
+                    <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                      <span className="font-bold text-slate-900 block mb-1">3. Sara (Tissue Excellence):</span>
+                      <p className="text-slate-600">{dashavidha.sara}</p>
                     </div>
-                    <div className="bg-surface-muted p-3.5 rounded-xl border border-border-light">
-                      <span className="font-bold text-text-primary block mb-1">4. Samhanana (Compactness):</span>
-                      <p className="text-text-secondary">{dashavidha.samhanana}</p>
+                    <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                      <span className="font-bold text-slate-900 block mb-1">4. Samhanana (Compactness):</span>
+                      <p className="text-slate-600">{dashavidha.samhanana}</p>
                     </div>
-                    <div className="bg-surface-muted p-3.5 rounded-xl border border-border-light">
-                      <span className="font-bold text-text-primary block mb-1">5. Satmya (Adaptability):</span>
-                      <p className="text-text-secondary">{dashavidha.satmya}</p>
+                    <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                      <span className="font-bold text-slate-900 block mb-1">5. Satmya (Adaptability):</span>
+                      <p className="text-slate-600">{dashavidha.satmya}</p>
                     </div>
-                    <div className="bg-surface-muted p-3.5 rounded-xl border border-border-light">
-                      <span className="font-bold text-text-primary block mb-1">6. Sattva (Mental Endurance):</span>
-                      <p className="text-text-secondary">{dashavidha.sattva}</p>
+                    <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                      <span className="font-bold text-slate-900 block mb-1">6. Sattva (Mental Endurance):</span>
+                      <p className="text-slate-600">{dashavidha.sattva}</p>
                     </div>
-                    <div className="bg-surface-muted p-3.5 rounded-xl border border-border-light">
-                      <span className="font-bold text-text-primary block mb-1">7. Ahara Shakti (Agni):</span>
-                      <p className="text-text-secondary">{dashavidha.aharaShakti}</p>
+                    <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                      <span className="font-bold text-slate-900 block mb-1">7. Ahara Shakti (Agni):</span>
+                      <p className="text-slate-600">{dashavidha.aharaShakti}</p>
                     </div>
-                    <div className="bg-surface-muted p-3.5 rounded-xl border border-border-light">
-                      <span className="font-bold text-text-primary block mb-1">8. Vyayama Shakti (Stamina):</span>
-                      <p className="text-text-secondary">{dashavidha.vyayamaShakti}</p>
+                    <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                      <span className="font-bold text-slate-900 block mb-1">8. Vyayama Shakti (Stamina):</span>
+                      <p className="text-slate-600">{dashavidha.vyayamaShakti}</p>
                     </div>
-                    <div className="bg-surface-muted p-3.5 rounded-xl border border-border-light">
-                      <span className="font-bold text-text-primary block mb-1">9. Vaya (Age Stage):</span>
-                      <p className="text-text-secondary">{dashavidha.vaya}</p>
+                    <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                      <span className="font-bold text-slate-900 block mb-1">9. Vaya (Age Stage):</span>
+                      <p className="text-slate-600">{dashavidha.vaya}</p>
                     </div>
-                    <div className="bg-surface-muted p-3.5 rounded-xl border border-border-light">
-                      <span className="font-bold text-text-primary block mb-1">10. Koshtha (Bowel Habit):</span>
-                      <p className="text-text-secondary">{dashavidha.koshtha}</p>
+                    <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                      <span className="font-bold text-slate-900 block mb-1">10. Koshtha (Bowel Habit):</span>
+                      <p className="text-slate-600">{dashavidha.koshtha}</p>
                     </div>
                   </div>
                 </Card>
@@ -818,7 +800,9 @@ export default function PatientDetail() {
               {/* TIMELINE TAB */}
               {activeTab === 'timeline' && (
                 <Card>
-                  <h3 className="font-bold text-text-primary font-heading text-base mb-6">Unified Patient Medical Timeline</h3>
+                  <h3 className="font-bold text-slate-900 font-heading text-base mb-6">
+                    {t('timeline', 'Unified Patient Medical Timeline')}
+                  </h3>
                   <Timeline events={timeline} />
                 </Card>
               )}
@@ -830,12 +814,12 @@ export default function PatientDetail() {
                     <Card key={doc.id}>
                       <div className="flex items-start justify-between">
                         <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-primary-50 flex items-center justify-center text-primary-600 border border-primary-200">
+                          <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-[#174ea6] border border-blue-200">
                             <FileText className="w-6 h-6" />
                           </div>
                           <div>
-                            <h4 className="font-bold text-text-primary text-base font-heading">{doc.fileName}</h4>
-                            <p className="text-xs text-text-muted">{doc.documentType} • {doc.documentDate}</p>
+                            <h4 className="font-bold text-slate-900 text-base font-heading">{doc.fileName}</h4>
+                            <p className="text-xs text-slate-500">{doc.documentType} • {doc.documentDate}</p>
                           </div>
                         </div>
 
@@ -845,7 +829,7 @@ export default function PatientDetail() {
                           icon={Eye}
                           onClick={() => setActiveInspectorDoc(doc)}
                         >
-                          Inspect Document & OCR Text
+                          {t('ocrScan', 'Inspect Document & OCR Text')}
                         </Button>
                       </div>
                     </Card>
@@ -858,14 +842,14 @@ export default function PatientDetail() {
                 <div className="space-y-3">
                   {interviewResponses.map((resp, i) => (
                     <Card key={i} padding="px-5 py-4">
-                      <p className="text-xs font-semibold text-text-muted mb-1">{resp.question}</p>
+                      <p className="text-xs font-semibold text-slate-500 mb-1">{resp.question}</p>
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-bold text-text-primary text-sm">
+                          <p className="font-bold text-slate-900 text-sm">
                             {Array.isArray(resp.structuredValue) ? resp.structuredValue.join(', ') : String(resp.structuredValue)}
                           </p>
                           {resp.originalResponse && (
-                            <p className="text-xs text-text-muted italic mt-1">"{resp.originalResponse}"</p>
+                            <p className="text-xs text-slate-400 italic mt-1">"{resp.originalResponse}"</p>
                           )}
                         </div>
                         <Badge severity="neutral" size="sm">
@@ -899,21 +883,21 @@ export default function PatientDetail() {
       {/* FHIR Bundle JSON Viewer Modal */}
       {fhirModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-surface-raised rounded-3xl border border-border-light shadow-2xl max-w-2xl w-full p-6">
-            <div className="flex items-center justify-between mb-4 border-b border-border-light pb-3">
-              <h3 className="font-bold text-text-primary text-base font-heading flex items-center gap-2">
-                <Code className="w-5 h-5 text-primary-600" /> Standardized ABDM FHIR Bundle JSON (HL7 R4)
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-2xl w-full p-6">
+            <div className="flex items-center justify-between mb-4 border-b border-slate-200 pb-3">
+              <h3 className="font-bold text-slate-900 text-base font-heading flex items-center gap-2">
+                <Code className="w-5 h-5 text-[#174ea6]" /> Standardized ABDM FHIR Bundle JSON (HL7 R4)
               </h3>
-              <button onClick={() => setFhirModalOpen(false)} className="p-1 text-text-muted hover:text-text-primary cursor-pointer">
+              <button onClick={() => setFhirModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <pre className="bg-gray-900 text-emerald-400 p-4 rounded-xl text-xs font-mono max-h-96 overflow-y-auto leading-relaxed">
+            <pre className="bg-slate-900 text-emerald-400 p-4 rounded-xl text-xs font-mono max-h-96 overflow-y-auto leading-relaxed">
               {JSON.stringify(fhirBundle, null, 2)}
             </pre>
             <div className="mt-4 flex justify-end">
               <Button size="md" onClick={() => setFhirModalOpen(false)}>
-                Close Viewer
+                {t('close', 'Close Viewer')}
               </Button>
             </div>
           </div>
@@ -923,35 +907,35 @@ export default function PatientDetail() {
       {/* Doctor Edit & Correction Modal */}
       {editModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-surface-raised rounded-3xl border border-border-light shadow-2xl max-w-lg w-full p-6 animate-fade-in-up">
-            <div className="flex items-center justify-between mb-4 border-b border-border-light pb-3">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-lg w-full p-6 animate-fade-in-up">
+            <div className="flex items-center justify-between mb-4 border-b border-slate-200 pb-3">
               <div className="flex items-center gap-2">
-                <Edit3 className="w-5 h-5 text-primary-600" />
-                <h3 className="font-bold text-text-primary text-base font-heading">
+                <Edit3 className="w-5 h-5 text-[#174ea6]" />
+                <h3 className="font-bold text-slate-900 text-base font-heading">
                   Physician Correction: {editModal.title}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setEditModal({ isOpen: false, sectionKey: '', title: '', textValue: '' })}
-                className="p-1 text-text-muted hover:text-text-primary cursor-pointer"
+                className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-3 mb-6">
-              <label className="text-xs font-bold text-text-secondary">
+              <label className="text-xs font-bold text-slate-600">
                 Clinical Finding / Correction (Physician Overrule):
               </label>
               <textarea
                 rows={5}
                 value={editModal.textValue}
                 onChange={(e) => setEditModal(prev => ({ ...prev, textValue: e.target.value }))}
-                className="w-full px-4 py-3 rounded-xl border border-border-light bg-surface-muted text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 font-sans leading-relaxed"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#174ea6] font-sans leading-relaxed"
                 placeholder="Enter corrected clinical notes, ICD diagnosis or revised symptoms..."
               />
-              <p className="text-[11px] text-text-muted">
+              <p className="text-[11px] text-slate-500">
                 ℹ️ Your clinical overrule will be marked as "Corrected by Physician" in the ABDM EHR Bundle and signed with your Practitioner Registration Number.
               </p>
             </div>
@@ -962,7 +946,7 @@ export default function PatientDetail() {
                 size="sm"
                 onClick={() => setEditModal({ isOpen: false, sectionKey: '', title: '', textValue: '' })}
               >
-                Cancel
+                {t('cancel', 'Cancel')}
               </Button>
               <Button
                 variant="primary"
@@ -970,7 +954,7 @@ export default function PatientDetail() {
                 icon={Check}
                 onClick={handleSaveCorrection}
               >
-                Save & Verify Correction
+                {t('verify', 'Save & Verify Correction')}
               </Button>
             </div>
           </div>
@@ -981,18 +965,19 @@ export default function PatientDetail() {
 }
 
 function SummarySection({ title, content, source, status, onConfirm, onEdit, onReject, onViewSource }) {
+  const { t } = useLanguage()
   return (
     <Card>
       <div className="flex items-center justify-between mb-2">
-        <h3 className="font-bold text-text-primary font-heading text-base">{title}</h3>
+        <h3 className="font-bold text-slate-900 font-heading text-base">{title}</h3>
         <VerificationButtons status={status} onConfirm={onConfirm} onEdit={onEdit} onReject={onReject} />
       </div>
-      <p className="text-sm text-text-secondary leading-relaxed">{content}</p>
-      <div className="flex items-center justify-between mt-3 pt-2 border-t border-border-light text-xs">
-        <span className="text-text-muted">Source: {source}</span>
+      <p className="text-sm text-slate-600 leading-relaxed">{content}</p>
+      <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-100 text-xs">
+        <span className="text-slate-400">Source: {source}</span>
         {onViewSource && (
-          <button onClick={onViewSource} className="text-primary-600 font-semibold hover:underline flex items-center gap-1 cursor-pointer">
-            <Eye className="w-3.5 h-3.5" /> Inspect Evidence
+          <button onClick={onViewSource} className="text-[#174ea6] font-semibold hover:underline flex items-center gap-1 cursor-pointer">
+            <Eye className="w-3.5 h-3.5" /> {t('sourceDocument', 'Inspect Evidence')}
           </button>
         )}
       </div>

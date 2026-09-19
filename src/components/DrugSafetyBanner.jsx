@@ -1,7 +1,9 @@
 import { AlertTriangle, ShieldAlert, CheckCircle2 } from 'lucide-react'
 import { checkDrugInteractions } from '../services/drugInteractionEngine'
+import { useLanguage } from '../context/LanguageContext'
 
 export default function DrugSafetyBanner({ medications = [], allergies = [], className = '' }) {
+  const { t } = useLanguage()
   const warnings = checkDrugInteractions(medications, allergies)
 
   if (warnings.length === 0) {
@@ -9,7 +11,7 @@ export default function DrugSafetyBanner({ medications = [], allergies = [], cla
       <div className={`bg-emerald-50 rounded-2xl border border-emerald-200 p-4 flex items-center gap-3 ${className}`}>
         <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
         <p className="text-xs text-emerald-900 font-medium">
-          Drug Safety Check Clear: No drug-drug interactions or allergy contraindications detected.
+          {t('drugSafetyCheckClear', 'Drug Safety Check Clear: No drug-drug interactions or allergy contraindications detected.')}
         </p>
       </div>
     )

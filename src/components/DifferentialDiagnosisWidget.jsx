@@ -3,8 +3,10 @@ import { motion } from 'framer-motion'
 import { Brain, Check, ShieldAlert, Sparkles, ChevronRight, Activity } from 'lucide-react'
 import Button from './Button'
 import Badge from './Badge'
+import { useLanguage } from '../context/LanguageContext'
 
 export default function DifferentialDiagnosisWidget({ candidates = [], onSelectICD }) {
+  const { t } = useLanguage()
   const [selectedCode, setSelectedCode] = useState(null)
 
   if (candidates.length === 0) return null
@@ -18,12 +20,16 @@ export default function DifferentialDiagnosisWidget({ candidates = [], onSelectI
           </div>
           <div>
             <h3 className="font-bold text-sm text-text-primary font-heading">
-              AI Differential Diagnosis & ICD-10 Candidates
+              {t('aiDifferentialTitle', 'AI Differential Diagnosis & ICD-10 Candidates')}
             </h3>
-            <p className="text-[11px] text-text-muted">Evidence-Backed Decision Support</p>
+            <p className="text-[11px] text-text-muted">
+              {t('evidenceBackedSupport', 'Evidence-Backed Decision Support')}
+            </p>
           </div>
         </div>
-        <Badge severity="primary" size="sm" dot>Physician Assisted</Badge>
+        <Badge severity="primary" size="sm" dot>
+          {t('physicianAssisted', 'Physician Assisted')}
+        </Badge>
       </div>
 
       <div className="space-y-3">
@@ -47,7 +53,7 @@ export default function DifferentialDiagnosisWidget({ candidates = [], onSelectI
                 <h4 className="font-bold text-text-primary text-sm">{cand.disease}</h4>
               </div>
               <span className="font-bold text-xs text-primary-700 font-heading">
-                {cand.probability}% Match
+                {cand.probability}% {t('match', 'Match')}
               </span>
             </div>
 
@@ -63,12 +69,14 @@ export default function DifferentialDiagnosisWidget({ candidates = [], onSelectI
 
             {/* Doctor Actions */}
             <div className="flex items-center justify-between pt-2 border-t border-border-light/60 mt-2">
-              <span className="text-[11px] text-text-muted">Rec. Tests: {cand.recommendedTests.slice(0, 2).join(', ')}</span>
+              <span className="text-[11px] text-text-muted">
+                {t('recTests', 'Rec. Tests:')} {cand.recommendedTests.slice(0, 2).join(', ')}
+              </span>
               <button
                 onClick={(e) => { e.stopPropagation(); onSelectICD?.(cand) }}
                 className="text-xs text-primary-600 font-bold hover:underline flex items-center gap-1 cursor-pointer"
               >
-                <Check className="w-3.5 h-3.5" /> Accept ICD Code
+                <Check className="w-3.5 h-3.5" /> {t('acceptIcdCode', 'Accept ICD Code')}
               </button>
             </div>
           </motion.div>

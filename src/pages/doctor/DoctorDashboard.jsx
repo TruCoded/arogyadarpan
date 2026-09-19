@@ -20,19 +20,20 @@ const fadeIn = {
   }),
 }
 
-const statusConfig = {
-  ready_for_review: { label: 'Ready for Review', chipClass: 'bg-blue-50 text-[#174ea6] border border-blue-200', icon: CheckCircle2 },
-  needs_verification: { label: 'Needs Verification', chipClass: 'bg-amber-50 text-amber-700 border border-amber-200', icon: AlertTriangle },
-  in_progress: { label: 'Intake In Progress', chipClass: 'bg-slate-100 text-slate-600', icon: Clock },
-}
-
 export default function DoctorDashboard() {
   const navigate = useNavigate()
+  const { t, lang } = useLanguage()
   const [searchQuery, setSearchQuery] = useState('')
   const [filterPriority, setFilterPriority] = useState('all')
 
   const hour = new Date().getHours()
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+  const greeting = hour < 12 ? t('goodMorning', 'Good morning') : hour < 17 ? t('goodAfternoon', 'Good afternoon') : t('goodEvening', 'Good evening')
+
+  const statusConfig = {
+    ready_for_review: { label: t('readyForReview', 'Ready for Review'), chipClass: 'bg-blue-50 text-[#174ea6] border border-blue-200', icon: CheckCircle2 },
+    needs_verification: { label: t('needsVerification', 'Needs Verification'), chipClass: 'bg-amber-50 text-amber-700 border border-amber-200', icon: AlertTriangle },
+    in_progress: { label: t('intakeInProgress', 'Intake In Progress'), chipClass: 'bg-slate-100 text-slate-600', icon: Clock },
+  }
 
   const priorityCount = DEMO_PATIENTS.filter(p =>
     p.clinicalSignals.some(s => s.severity === 'critical' || s.severity === 'high')
@@ -74,14 +75,14 @@ export default function DoctorDashboard() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-heading text-lg font-black tracking-tight text-slate-900">
-                  ArogyaDarpan
+                  {t('appName', 'ArogyaDarpan')}
                 </span>
                 <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-[#174ea6] border border-blue-200">
-                  Physician Triage Console
+                  {t('physicianTriageConsole', 'Physician Triage Console')}
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 font-medium">
-                Clinical Decision Support • ABDM Linked • AYUSH Integration
+                {t('cdsTagline', 'Clinical Decision Support • ABDM Linked • AYUSH Integration')}
               </p>
             </div>
           </div>
@@ -98,7 +99,7 @@ export default function DoctorDashboard() {
             <button
               onClick={() => navigate('/')}
               className="p-2 rounded-full border border-slate-200 text-slate-500 hover:text-red-500 hover:border-red-200 transition cursor-pointer"
-              title="Logout to Home"
+              title={t('logout', 'Logout to Home')}
             >
               <LogOut className="size-4.5" />
             </button>
@@ -125,7 +126,7 @@ export default function DoctorDashboard() {
               className="px-4 py-2 text-xs font-bold text-[#174ea6] bg-white border border-blue-200 hover:bg-blue-50 rounded-full transition cursor-pointer flex items-center gap-1.5 shadow-xs"
             >
               <Activity className="size-3.5" />
-              <span>Switch to Kiosk View</span>
+              <span>{t('medikioskView', 'MediKiosk View')}</span>
             </button>
           </motion.div>
 
@@ -137,7 +138,7 @@ export default function DoctorDashboard() {
             </div>
             <div className="flex flex-col items-center justify-center text-center p-2.5 rounded-xl bg-slate-50">
               <span className="font-mono text-xl sm:text-2xl text-slate-900 font-bold leading-tight">3</span>
-              <span className="text-[10px] font-mono uppercase text-slate-500 mt-0.5 font-semibold">In Queue</span>
+              <span className="text-[10px] font-mono uppercase text-slate-500 mt-0.5 font-semibold">{t('totalInQueue', 'In Queue')}</span>
             </div>
             <div className="flex flex-col items-center justify-center text-center p-2.5 rounded-xl bg-red-50 border border-red-200">
               <div className="flex items-center gap-1.5">
@@ -171,7 +172,7 @@ export default function DoctorDashboard() {
                   {priorityCount}
                 </p>
                 <p className="text-xs font-bold text-red-600 flex items-center gap-1 mt-0.5">
-                  Priority Red-Flag Signals
+                  {t('criticalHighPriority', 'Priority Red-Flag Signals')}
                 </p>
                 <p className="text-[11px] text-slate-400">High severity triage alerts</p>
               </div>
@@ -194,7 +195,7 @@ export default function DoctorDashboard() {
                   {readyCount}
                 </p>
                 <p className="text-xs font-bold text-[#174ea6] flex items-center gap-1 mt-0.5">
-                  Ready for Consultation
+                  {t('readyForReview', 'Ready for Consultation')}
                 </p>
                 <p className="text-[11px] text-slate-400">Intake & OCR completed</p>
               </div>
@@ -217,7 +218,7 @@ export default function DoctorDashboard() {
                   {reviewCount}
                 </p>
                 <p className="text-xs font-bold text-amber-700 flex items-center gap-1 mt-0.5">
-                  Needs Physician Verification
+                  {t('needsVerification', 'Needs Physician Verification')}
                 </p>
                 <p className="text-[11px] text-slate-400">Complex history / pending tests</p>
               </div>
@@ -232,7 +233,7 @@ export default function DoctorDashboard() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search patient, complaint, phone..."
+                placeholder={t('searchPatientPlaceholder', 'Search patient, complaint, phone...')}
                 className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-[#174ea6] transition-all shadow-xs"
               />
             </div>
@@ -240,10 +241,10 @@ export default function DoctorDashboard() {
             <div className="flex items-center gap-2 self-start sm:self-auto overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
               <Filter className="size-3.5 text-slate-400 shrink-0" />
               {[
-                { id: 'all', label: 'All Patients' },
-                { id: 'priority', label: 'Priority Alerts' },
-                { id: 'ready', label: 'Ready for Review' },
-                { id: 'review', label: 'Needs Verification' },
+                { id: 'all', label: t('allPatients', 'All Patients') },
+                { id: 'priority', label: t('criticalHighPriority', 'Priority Alerts') },
+                { id: 'ready', label: t('readyForReview', 'Ready for Review') },
+                { id: 'review', label: t('needsVerification', 'Needs Verification') },
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -354,7 +355,7 @@ export default function DoctorDashboard() {
 
                       {/* Chief Complaint Box */}
                       <div className="mt-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs">
-                        <span className="font-bold text-slate-700">Chief Complaint: </span>
+                        <span className="font-bold text-slate-700">{t('chiefComplaint', 'Chief Complaint')}: </span>
                         <span className="text-slate-600">{patient.consultation.chiefComplaintText}</span>
                       </div>
 
@@ -367,7 +368,7 @@ export default function DoctorDashboard() {
                           </span>
                         </div>
                         <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-mono uppercase text-slate-400 font-bold block">Heart Rate</span>
+                          <span className="text-[10px] font-mono uppercase text-slate-400 font-bold block">{t('heartRate', 'Heart Rate')}</span>
                           <span className="font-mono text-xs font-bold text-slate-900">
                             {patient.id === 'demo-001' ? '108 bpm' : '78 bpm'}
                           </span>
@@ -386,7 +387,7 @@ export default function DoctorDashboard() {
                           {status.label}
                         </span>
                         <div className="flex items-center gap-1 text-xs font-bold text-[#174ea6] group">
-                          <span>Open Decision Station</span>
+                          <span>{t('reviewPatientSummary', 'Open Decision Station')}</span>
                           <ChevronRight className="size-4 group-hover:translate-x-0.5 transition-transform" />
                         </div>
                       </div>
@@ -402,11 +403,11 @@ export default function DoctorDashboard() {
                 <div className="min-w-[760px]">
                   {/* Header */}
                   <div className="grid grid-cols-12 gap-3 px-6 py-3.5 bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                    <div className="col-span-4">Patient Identity & ABHA</div>
-                    <div className="col-span-1">Age / Sex</div>
-                    <div className="col-span-3">Chief Complaint</div>
-                    <div className="col-span-2">Consult Status</div>
-                    <div className="col-span-2 text-right">Signals & Action</div>
+                    <div className="col-span-4">{t('patientDetails', 'Patient Identity & ABHA')}</div>
+                    <div className="col-span-1">{t('age', 'Age')} / {t('gender', 'Sex')}</div>
+                    <div className="col-span-3">{t('chiefComplaint', 'Chief Complaint')}</div>
+                    <div className="col-span-2">{t('triageStatus', 'Consult Status')}</div>
+                    <div className="col-span-2 text-right">{t('signalsAndAction', 'Signals & Action')}</div>
                   </div>
 
                   {/* Rows */}
