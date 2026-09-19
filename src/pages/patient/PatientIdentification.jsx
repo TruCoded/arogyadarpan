@@ -66,8 +66,9 @@ export default function PatientIdentification() {
   }
 
   const continueWithIdentifier = () => {
-    if (!identifier.trim()) {
-      setMessage(t('patientNotFound', 'Please enter an identifier to continue.'))
+    const cleanId = identifier.trim()
+    if (!cleanId) {
+      setMessage(t('searchPatient', 'Please enter your mobile number or ID to continue.'))
       return
     }
     setLoading(true)
@@ -75,18 +76,30 @@ export default function PatientIdentification() {
 
     window.setTimeout(() => {
       let patient = null
-      if (mode === 'mobile' || mode === 'patient-id') patient = findPatientByIdentifier(identifier.trim())
-      if (!patient && (mode === 'abha-number' || mode === 'abha-address')) patient = demoProfile(identifier.trim())
+      if (mode === 'mobile' || mode === 'patient-id') patient = findPatientByIdentifier(cleanId)
+      if (!patient && (mode === 'abha-number' || mode === 'abha-address')) patient = demoProfile(cleanId)
 
+      // If patient does not exist in demo database, auto-create a profile with this number and proceed seamlessly!
       if (!patient) {
-        setLoading(false)
-        setMessage(t('patientNotFound', 'No local patient record was found. You can register as a new patient.'))
-        return
+        patient = {
+          patientId: generatePatientId(),
+          name: mode === 'mobile' ? `Patient (${cleanId})` : cleanId,
+          age: '35',
+          gender: 'Other',
+          phone: mode === 'mobile' ? cleanId : '',
+          abhaId: mode.includes('abha') ? cleanId : '',
+          bloodGroup: 'Not recorded',
+          pastMedicalHistory: [],
+          knownAllergies: [],
+          isReturningPatient: false,
+          registeredAt: new Date().toISOString(),
+        }
+        saveRegisteredPatient(patient)
       }
 
-      localStorage.setItem('arogya_patient', JSON.stringify({ ...patient, isReturningPatient: true }))
+      localStorage.setItem('arogya_patient', JSON.stringify({ ...patient, isReturningPatient: Boolean(patient.isReturningPatient) }))
       navigate('/patient/interview')
-    }, 450)
+    }, 300)
   }
 
   const registerPatient = (event) => {

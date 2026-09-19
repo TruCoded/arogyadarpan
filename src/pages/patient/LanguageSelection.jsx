@@ -19,7 +19,7 @@ const GREETINGS = {
 }
 
 export default function LanguageSelection() {
-  const { lang, setLanguage, languages, t } = useLanguage()
+  const { lang, setLanguage, languages, currentLanguageMeta, t } = useLanguage()
   const navigate = useNavigate()
   const [speaking, setSpeaking] = useState(null)
 
@@ -41,6 +41,10 @@ export default function LanguageSelection() {
       () => setSpeaking(null),
       () => setSpeaking(null)
     )
+  }
+
+  const handleSelectLanguage = (selectedId) => {
+    setLanguage(selectedId)
   }
 
   return (
@@ -65,24 +69,26 @@ export default function LanguageSelection() {
               <button
                 key={item.id}
                 type="button"
-                onClick={() => setLanguage(item.id)}
-                className={`flex w-full items-center gap-4 px-4 py-4 text-left transition sm:px-5 ${
+                onClick={() => handleSelectLanguage(item.id)}
+                className={`flex w-full items-center gap-4 px-4 py-4 text-left transition sm:px-5 cursor-pointer ${
                   index ? 'border-t border-slate-200' : ''
-                } ${selected ? 'bg-blue-50' : 'hover:bg-slate-50'}`}
+                } ${selected ? 'bg-blue-50/80 font-bold' : 'hover:bg-slate-50'}`}
               >
-                <span className={`flex size-11 shrink-0 items-center justify-center rounded-full text-sm font-bold ${selected ? 'bg-[#174ea6] text-white' : 'bg-slate-100 text-slate-600'}`}>
+                <span className={`flex size-11 shrink-0 items-center justify-center rounded-full text-sm font-bold ${selected ? 'bg-[#174ea6] text-white shadow-sm' : 'bg-slate-100 text-slate-600'}`}>
                   {item.native.slice(0, 2)}
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-base font-bold text-slate-950">{item.native}</span>
+                  <span className="block text-xs text-slate-500 font-normal">{item.label} ({item.region || 'India'})</span>
                 </span>
                 <span
                   role="button"
                   tabIndex={0}
                   onClick={(event) => preview(event, item)}
                   onKeyDown={(event) => event.key === 'Enter' && preview(event, item)}
-                  className={`flex size-10 shrink-0 items-center justify-center rounded-full ${speaking === item.id ? 'bg-[#174ea6] text-white' : 'text-[#174ea6] hover:bg-blue-50'}`}
+                  className={`flex size-10 shrink-0 items-center justify-center rounded-full transition ${speaking === item.id ? 'bg-[#174ea6] text-white' : 'text-[#174ea6] hover:bg-blue-100/60'}`}
                   aria-label={t('readAloud')}
+                  title={t('readAloud', 'Listen')}
                 >
                   <Volume2 className="size-5" />
                 </span>
@@ -97,9 +103,10 @@ export default function LanguageSelection() {
         <button
           type="button"
           onClick={() => navigate('/patient/consent')}
-          className="mx-auto flex w-full max-w-2xl items-center justify-center gap-2 rounded-full bg-[#174ea6] px-6 py-3.5 text-base font-bold text-white transition hover:bg-[#123b79] active:scale-[0.99]"
+          className="mx-auto flex w-full max-w-2xl items-center justify-center gap-2 rounded-full bg-[#174ea6] px-6 py-3.5 text-base font-bold text-white transition hover:bg-[#123b79] active:scale-[0.99] cursor-pointer shadow-md"
         >
-          {t('continue', 'Continue')}
+          <span>{t('continue', 'Continue')}</span>
+          <span className="opacity-90 font-normal">({currentLanguageMeta?.native || 'English'})</span>
           <ArrowRight className="size-5" />
         </button>
       </div>
