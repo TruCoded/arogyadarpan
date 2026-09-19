@@ -269,129 +269,73 @@ export function parsePrescriptionLines(text) {
  */
 export async function scanMedicalDocument(imageSource, onProgress) {
   let rawText = ''
-  let confidence = 0.88
+  let confidence = 0.85
 
   try {
-    onProgress?.({ status: 'Preprocessing image: contrast stretch & adaptive binarization...', progress: 15 })
+    onProgress?.({ status: 'Preprocessing image: contrast stretch & adaptive binarization...', progress: 20 })
     const preprocessedImage = await enhanceImageForOCR(imageSource)
 
-    onProgress?.({ status: 'Initializing Tesseract OCR neural engine...', progress: 35 })
+    onProgress?.({ status: 'Running OCR neural text extraction...', progress: 50 })
     const worker = await createWorker('eng')
-
-    onProgress?.({ status: 'Recognizing handwritten & printed clinical text...', progress: 65 })
     const { data } = await worker.recognize(preprocessedImage)
-    rawText = data.text || ''
-    confidence = Math.round((data.confidence || 85)) / 100
-
+    rawText = (data.text || '').trim()
+    confidence = Math.round((data.confidence || 80)) / 100
     await worker.terminate()
-    onProgress?.({ status: 'Extracting Rx medications, dosages & lab values...', progress: 85 })
   } catch (err) {
-    console.warn('Tesseract OCR fallback triggered:', err)
-    let patientName = 'Rahul Sharma'
-    try {
-      const stored = localStorage.getItem('arogya_patient')
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        if (parsed.name) patientName = parsed.name
-      }
-    } catch { /* ignore */ }
-
-    rawText = `
-    METRO HEALTHCARE CLINIC & PATHOLOGY LABS
-    Date: 12/05/2025
-    Patient: ${patientName} | Age: 46 | Gender: Male
-    Consultant: Dr. A. K. Patel, MD (Internal Medicine)
-    Reg No: DMC-48291
-
-    CLINICAL DIAGNOSES:
-    - Type 2 Diabetes Mellitus
-    - Essential Hypertension
-
-    PRESCRIPTION (Rx):
-    1. Tab Metformin 500 mg — 1-0-1 BD (After Meals) x 30 days
-    2. Tab Amlodipine 5 mg — 1-0-0 OD (Morning) x 30 days
-    3. Tab Aspirin 75 mg — 0-1-0 OD (After Lunch) x 30 days
-
-    LABORATORY INVESTIGATION REPORT:
-    - HbA1c: 8.4 % (Ref: 4.0 - 5.6 %)
-    - Fasting Blood Sugar (FBS): 168 mg/dL (Ref: 70 - 99 mg/dL)
-    - Serum Creatinine: 1.2 mg/dL (Ref: 0.6 - 1.2 mg/dL)
-    - Total Cholesterol: 224 mg/dL (Ref: 100 - 200 mg/dL)
-
-    ADVICE & FOLLOW-UP:
-    - Low salt & diabetic diet recommended
-    - Regular morning walking for 30 minutes
-    - Review in clinic with repeat HbA1c after 3 months
-    - Authorized Signature & Hospital Seal Verified
-    `
-    confidence = 0.93
+    console.warn('OCR extraction warning:', err)
+    rawText = ''
+    confidence = 0.50
   }
 
-  // 1. Line-by-line regex parsing (Medical-Prescription-OCR style)
+  onProgress?.({ status: 'Analyzing extracted text & clinical entities...', progress: 85 })
+
+  // 1. Line-by-line regex parsing from authentic OCR text
   const rxParsed = parsePrescriptionLines(rawText)
 
-  // 2. Comprehensive Document Intelligence & Classification
+  // 2. Document Intelligence entity parser
   const docIntel = processMedicalDocumentIntelligence(rawText)
   const parsedBasic = extractMedicalEntities(rawText)
 
-  // 3. Merge Medications from line parser and known dictionary
+  // 3. Merge only actually detected medications
   const medicationMap = new Map()
 
-  // First add regex-parsed medications
   for (const med of rxParsed.medications) {
     const key = med.name.toLowerCase().trim()
-    medicationMap.set(key, {
-      id: med.id || `med-${Math.random().toString(36).substr(2, 7)}`,
-      name: med.name,
-      form: med.form || 'Tablet',
-      strength: med.strength || 'Standard dose',
-      frequency: med.frequency || '1-0-1 (Twice Daily)',
-      duration: med.duration || '30 days',
-      timing: med.timing || 'After Food',
-      category: 'Prescription Drug',
-      confidence: med.confidence || 0.92,
-    })
+    if (key.length > 1) {
+      medicationMap.set(key, {
+        id: med.id || `med-${Math.random().toString(36).substr(2, 7)}`,
+        name: med.name,
+        form: med.form || 'Tablet',
+        strength: med.strength || 'Standard dose',
+        frequency: med.frequency || '1-0-1 (Twice Daily)',
+        duration: med.duration || 'As directed',
+        timing: med.timing || 'After Food',
+        category: 'Prescription Drug',
+        confidence: med.confidence || 0.90,
+      })
+    }
   }
 
-  // Add document intelligence normalized meds if not duplicate
   for (const med of docIntel.extractedData.medications) {
     const key = med.name.toLowerCase().trim()
-    if (!medicationMap.has(key)) {
+    if (key.length > 1 && !medicationMap.has(key)) {
       medicationMap.set(key, {
         id: `med-${Math.random().toString(36).substr(2, 7)}`,
         name: med.name,
         form: 'Tablet',
         strength: med.strength || 'Standard dose',
         frequency: med.frequency || '1-0-1 (Twice Daily)',
-        duration: med.duration || '30 days',
+        duration: med.duration || 'As directed',
         timing: 'After Food',
         category: med.category || 'Prescription Drug',
-        confidence: med.confidence || 0.90,
-      })
-    }
-  }
-
-  // Add basic entity meds if still missing
-  for (const med of parsedBasic.medications) {
-    const key = med.name.toLowerCase().trim()
-    if (!medicationMap.has(key)) {
-      medicationMap.set(key, {
-        id: `med-${Math.random().toString(36).substr(2, 7)}`,
-        name: med.name,
-        form: 'Tablet',
-        strength: med.dosage || 'Standard dose',
-        frequency: '1-0-1 (Twice Daily)',
-        duration: '30 days',
-        timing: 'After Food',
-        category: med.category || 'Prescription Drug',
-        confidence: med.confidence || 0.90,
+        confidence: med.confidence || 0.88,
       })
     }
   }
 
   const allMedications = Array.from(medicationMap.values())
 
-  // 4. Merge Investigations & Lab Results
+  // 4. Merge only actually detected lab investigations
   const investigationMap = new Map()
 
   for (const lab of rxParsed.labResults) {
@@ -406,13 +350,13 @@ export async function scanMedicalDocument(imageSource, onProgress) {
       status: lab.status,
       direction: lab.direction,
       abnormalFlag: lab.status === 'abnormal' ? (lab.direction === 'high' ? '↑ High' : '↓ Low') : 'Normal',
-      confidence: lab.confidence || 0.92
+      confidence: lab.confidence || 0.90
     })
   }
 
   for (const inv of docIntel.extractedData.investigations) {
     const key = (inv.test || inv.name || '').toLowerCase().trim()
-    if (!investigationMap.has(key)) {
+    if (key.length > 1 && !investigationMap.has(key)) {
       investigationMap.set(key, {
         id: `lab-${Math.random().toString(36).substr(2, 7)}`,
         test: inv.test || inv.name,
@@ -423,69 +367,44 @@ export async function scanMedicalDocument(imageSource, onProgress) {
         status: inv.status || 'normal',
         direction: inv.direction || 'normal',
         abnormalFlag: inv.status === 'abnormal' ? (inv.direction === 'high' ? '↑ High' : '↓ Low') : 'Normal',
-        confidence: inv.confidence || 0.92
-      })
-    }
-  }
-
-  for (const lab of parsedBasic.labResults) {
-    const key = (lab.name || lab.key || '').toLowerCase().trim()
-    if (!investigationMap.has(key)) {
-      investigationMap.set(key, {
-        id: `lab-${Math.random().toString(36).substr(2, 7)}`,
-        test: lab.name,
-        name: lab.name,
-        value: lab.value,
-        unit: lab.unit,
-        referenceRange: lab.normalRange || 'Standard',
-        status: lab.status,
-        direction: lab.direction,
-        abnormalFlag: lab.status === 'abnormal' ? (lab.direction === 'high' ? '↑ High' : '↓ Low') : 'Normal',
-        confidence: lab.confidence || 0.94
+        confidence: inv.confidence || 0.90
       })
     }
   }
 
   const mergedInvestigations = Array.from(investigationMap.values())
 
-  // 5. Merge Diagnoses
+  // 5. Diagnoses only extracted from text
   const allDiagnoses = Array.from(new Set([
     ...rxParsed.diagnoses,
     ...docIntel.extractedData.diagnoses,
-    ...(rawText.toLowerCase().includes('diabetes') ? ['Type 2 Diabetes Mellitus'] : []),
-    ...(rawText.toLowerCase().includes('hypertension') ? ['Essential Hypertension'] : []),
   ])).filter(Boolean)
 
-  // 6. Merge Clinical Advice & Follow-up
+  // 6. Advice only extracted from text
   const allAdvice = Array.from(new Set([
     ...rxParsed.advice,
     ...(docIntel.extractedData.procedures || []),
   ])).filter(Boolean)
 
-  // 7. Clinical Decision Support: Drug-Drug Interaction Safety (Feature 27)
-  const detectedInteractions = detectDrugInteractions(allMedications)
+  // 7. Clinical Drug-Drug Interactions on actual extracted meds
+  const detectedInteractions = allMedications.length > 1 ? detectDrugInteractions(allMedications) : []
 
   onProgress?.({ status: 'OCR Extraction Complete!', progress: 100 })
 
   return {
     rawText,
-    documentType: docIntel.documentType || 'Prescription',
-    documentCategory: docIntel.documentType || 'Prescription',
-    classificationConfidence: docIntel.classificationConfidence || 0.94,
-    documentDate: docIntel.documentDate || extractDocumentDate(rawText),
-    doctorInfo: rxParsed.doctorInfo.name ? rxParsed.doctorInfo : {
-      name: 'Dr. A. K. Patel, MD',
-      qualification: 'MD (Internal Medicine)',
-      regNo: 'DMC-48291',
-      clinicName: 'Metro Healthcare Clinic & Labs',
-    },
+    documentType: docIntel.documentType || (allMedications.length ? 'Prescription' : 'Medical Record'),
+    documentCategory: docIntel.documentType || 'Medical Record',
+    classificationConfidence: rawText ? (docIntel.classificationConfidence || 0.90) : 0,
+    documentDate: extractDocumentDate(rawText) || new Date().toISOString().split('T')[0],
+    doctorInfo: rxParsed.doctorInfo.name ? rxParsed.doctorInfo : null,
     patientInfo: rxParsed.patientInfo.name ? rxParsed.patientInfo : null,
     stampAndSignature: docIntel.stampAndSignature || {
-      detected: true,
-      hasSignature: true,
-      hasStamp: true,
-      confidence: 0.92,
-      signatory: 'Authorized Medical Officer'
+      detected: false,
+      hasSignature: false,
+      hasStamp: false,
+      confidence: 0,
+      signatory: null
     },
     abnormalValuesCount: mergedInvestigations.filter(i => i.status !== 'normal').length,
     extractedData: {
@@ -493,12 +412,12 @@ export async function scanMedicalDocument(imageSource, onProgress) {
       medications: allMedications,
       investigations: mergedInvestigations,
       procedures: docIntel.extractedData.procedures,
-      symptoms: docIntel.extractedData.symptoms.length > 0 ? docIntel.extractedData.symptoms : parsedBasic.symptoms.map(s => s.label),
+      symptoms: docIntel.extractedData.symptoms,
       allergies: parsedBasic.allergies,
       advice: allAdvice,
     },
     drugInteractions: detectedInteractions,
-    confidence: Math.max(confidence, docIntel.classificationConfidence || 0.90),
+    confidence: rawText ? Math.max(confidence, docIntel.classificationConfidence || 0.85) : 0,
     parsedAt: new Date().toISOString(),
   }
 }
