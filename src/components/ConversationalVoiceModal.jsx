@@ -6,6 +6,7 @@ import Badge from './Badge'
 import { useVoiceInput } from '../hooks/useVoiceInput'
 import { parseConversationalIntake } from '../services/conversationalAiEngine'
 import { useLanguage } from '../context/LanguageContext'
+import { playLanguageAudio, stopLanguageAudio } from '../services/audioTtsService'
 
 export default function ConversationalVoiceModal({
   isOpen,
@@ -56,21 +57,25 @@ export default function ConversationalVoiceModal({
       startListening()
     } else {
       stopListening()
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel()
+      stopLanguageAudio()
     }
   }, [isOpen])
 
   // AI audio reply
   const handleSpeakAiReply = () => {
-    if (!parsedResult?.conversationalReply || !('speechSynthesis' in window)) return
-    window.speechSynthesis.cancel()
-    const utterance = new SpeechSynthesisUtterance(parsedResult.conversationalReply)
-    utterance.lang = lang === 'hi' ? 'hi-IN' : 'en-IN'
-    utterance.rate = 0.95
-    utterance.onstart = () => setIsAiSpeaking(true)
-    utterance.onend = () => setIsAiSpeaking(false)
-    utterance.onerror = () => setIsAiSpeaking(false)
-    window.speechSynthesis.speak(utterance)
+    if (!parsedResult?.conversationalReply) return
+    if (isAiSpeaking) {
+      stopLanguageAudio()
+      setIsAiSpeaking(false)
+      return
+    }
+    setIsAiSpeaking(true)
+    playLanguageAudio(
+      parsedResult.conversationalReply,
+      lang,
+      () => setIsAiSpeaking(false),
+      () => setIsAiSpeaking(false)
+    )
   }
 
   const handleApply = () => {

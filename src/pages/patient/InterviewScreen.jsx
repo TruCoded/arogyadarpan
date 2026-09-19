@@ -32,6 +32,7 @@ import { COMPLAINT_OPTIONS, getLocalizedQuestion, getLocalizedOption } from '../
 import { clearPatientSession } from '../../services/sessionStore'
 import { normalizeVoiceInput } from '../../services/voiceNormalizationEngine'
 import { evaluateRedFlags } from '../../services/redFlagRules'
+import { playLanguageAudio, stopLanguageAudio } from '../../services/audioTtsService'
 
 export default function InterviewScreen() {
   const navigate = useNavigate()
@@ -146,9 +147,7 @@ export default function InterviewScreen() {
 
   useEffect(() => {
     return () => {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel()
-      }
+      stopLanguageAudio()
     }
   }, [])
 
@@ -163,26 +162,22 @@ export default function InterviewScreen() {
 
   // Dynamic Multi-Language Speech Synthesis (TTS)
   const handleReadAloud = (customRate = speechRate, customVol = volume) => {
-    if (!currentQuestion || !('speechSynthesis' in window)) return
+    if (!currentQuestion) return
 
     if (isSpeaking) {
-      window.speechSynthesis.cancel()
+      stopLanguageAudio()
       setIsSpeaking(false)
       return
     }
 
     const questionToSpeak = getLocalizedQuestion(currentQuestion, lang)
-    window.speechSynthesis.cancel()
-    const utterance = new SpeechSynthesisUtterance(questionToSpeak)
-    utterance.rate = customRate
-    utterance.volume = customVol
-    utterance.lang = speechLocale
-
-    utterance.onend = () => setIsSpeaking(false)
-    utterance.onerror = () => setIsSpeaking(false)
-
     setIsSpeaking(true)
-    window.speechSynthesis.speak(utterance)
+    playLanguageAudio(
+      questionToSpeak,
+      lang,
+      () => setIsSpeaking(false),
+      () => setIsSpeaking(false)
+    )
   }
 
   // Handle Free Conversational Natural Speech AI Intake

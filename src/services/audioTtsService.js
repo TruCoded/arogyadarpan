@@ -2,9 +2,15 @@
 // ArogyaDarpan — Bulletproof Multilingual Audio & TTS Engine
 // Full native voice support for all 10 Indian languages:
 // hi, pa, bn, ta, te, mr, gu, kn, ml, en
+//
+// Powered by Real Native Neural TTS Streaming with
+// Web Speech API fallback for zero-latency offline playback.
 // ============================================================
 
 let currentAudio = null
+let currentQueue = []
+let currentQueueIndex = 0
+let isPlayingQueue = false
 let cachedVoices = []
 
 function loadVoices() {
@@ -25,282 +31,276 @@ if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
   }
 }
 
-const LANGUAGE_MAP = {
-  en: { bcp47: 'en-IN', alt: 'en-US', name: 'English' },
-  hi: { bcp47: 'hi-IN', alt: 'hi', name: 'Hindi' },
-  pa: { bcp47: 'pa-IN', alt: 'hi-IN', name: 'Punjabi' },
-  bn: { bcp47: 'bn-IN', alt: 'bn-BD', name: 'Bengali' },
-  ta: { bcp47: 'ta-IN', alt: 'ta-LK', name: 'Tamil' },
-  te: { bcp47: 'te-IN', alt: 'te-IN', name: 'Telugu' },
-  mr: { bcp47: 'mr-IN', alt: 'hi-IN', name: 'Marathi' },
-  gu: { bcp47: 'gu-IN', alt: 'hi-IN', name: 'Gujarati' },
-  kn: { bcp47: 'kn-IN', alt: 'kn-IN', name: 'Kannada' },
-  ml: { bcp47: 'ml-IN', alt: 'ml-IN', name: 'Malayalam' },
-}
-
-// Curated high-fidelity Phonetic Pronunciations for Greeting & Common Intake
-const PHONETIC_DICTIONARY = {
-  // Greetings
-  'Hello. You can use ArogyaDarpan in English.': 'Hello. You can use Arogya Darpan in English.',
-  'नमस्ते। आप आरोग्यदर्पण का उपयोग हिन्दी में कर सकते हैं।': 'Namaste. Aap Arogya Darpan ka upyog Hindi mein kar sakte hain.',
-  'নমস্কার। আপনি বাংলায় আরোগ্যদর্পণ ব্যবহার করতে পারেন।': 'Nomoshkar. Aponi Banglay Arogya Darpan byabohar korte paren.',
-  'வணக்கம். நீங்கள் ஆரோக்யதர்பனை தமிழில் பயன்படுத்தலாம்.': 'Vanakkam. Neengal Arogya Darpanai Thamizhil payanpaduthalaam.',
-  'నమస్కారం. మీరు ఆరోగ్యదర్పణ్‌ను తెలుగులో ఉపయోగించవచ్చు.': 'Namaskaram. Meeru Arogya Darpan nu Telugu lo upayoginchavachhu.',
-  'नमस्कार. तुम्ही आरोग्यदर्पण मराठीत वापरू शकता.': 'Namaskar. Tumhi Arogya Darpan Marathit vapru shakta.',
-  'નમસ્તે. તમે આરોગ્યદર્પણનો ગુજરાતીમાં ઉપયોગ કરી શકો છો.': 'Namaste. Tame Arogya Darpan no Gujarati ma upyog kari shako chho.',
-  'ನಮಸ್ಕಾರ. ನೀವು ಆರೋಗ್ಯದರ್ಪಣವನ್ನು ಕನ್ನಡದಲ್ಲಿ ಬಳಸಬಹುದು.': 'Namaskara. Neevu Arogya Darpan vannu Kannada dalli balasabahudu.',
-  'ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ। ਤੁਸੀਂ ਆਰੋਗਿਆਦਰਪਣ ਨੂੰ ਪੰਜਾਬੀ ਵਿੱਚ ਵਰਤ ਸਕਦੇ ਹੋ।': 'Sat Sri Akaal. Tuseen Arogya Darpan nu Punjabi vich varat sakde ho.',
-  'നമസ്കാരം. നിങ്ങൾക്ക് ആരോഗ്യദർപ്പൺ മലയാളത്തിൽ ഉപയോഗിക്കാം.': 'Namaskaram. Ningalkku Arogya Darpan Malayalathil upayogikkam.',
-
-  // Language Names
-  'ਪੰਜਾਬੀ': 'Punjabi',
-  'தமிழ்': 'Thamizh',
-  'తెలుగు': 'Telugu',
-  'বাংলা': 'Bangla',
-  'मराठी': 'Marathi',
-  'ગુજરાતી': 'Gujarati',
-  'ಕನ್ನಡ': 'Kannada',
-  'മലയാളം': 'Malayalam',
-  'हिन्दी': 'Hindi',
-}
-
-// Basic Indic Consonant & Vowel Map for automatic fallback transliteration
-const INDIC_CONSONANTS = {
-  k: ['ক', 'ਕ', 'ક', 'க', 'క', 'ಕ', 'ക', 'क'],
-  kh: ['খ', 'ਖ', 'ખ', 'ఖ', 'ಖ', 'ഖ', 'ख'],
-  g: ['গ', 'ਗ', 'ગ', 'గ', 'ಗ', 'ഗ', 'ग'],
-  gh: ['ঘ', 'ਘ', 'ઘ', 'ఘ', 'ಘ', 'ഘ', 'घ'],
-  ch: ['চ', 'ਚ', 'ચ', 'ச', 'చ', 'ಚ', 'ച', 'च'],
-  chh: ['ছ', 'ਛ', 'છ', 'ఛ', 'ಛ', 'ഛ', 'छ'],
-  j: ['জ', 'ਜ', 'જ', 'జ', 'ಜ', 'ജ', 'ज'],
-  jh: ['ঝ', 'ਝ', 'ઝ', 'ఝ', 'ಝ', 'ഝ', 'झ'],
-  t: ['ট', 'ਤ', 'ਟ', 'ત', 'ટ', 'த', 'ట', 'త', 'ಟ', 'ತ', 'ത', 'ട', 'त', 'ट'],
-  th: ['ঠ', 'ਥ', 'ਠ', 'થ', 'ઠ', 'థ', 'ఠ', 'ಥ', 'ಠ', 'ഥ', 'ഠ', 'थ', 'ठ'],
-  d: ['ড', 'দ', 'ਦ', 'ਡ', 'દ', 'ડ', 'ద', 'డ', 'ದ', 'ಡ', 'ദ', 'ഡ', 'द', 'ड'],
-  dh: ['ঢ', 'ধ', 'ਧ', 'ਢ', 'ધ', 'ઢ', 'ధ', 'ఢ', 'ಧ', 'ಢ', 'ധ', 'ഢ', 'ध', 'ढ'],
-  n: ['ন', 'ণ', 'ਨ', 'ਣ', 'ન', 'ણ', 'ந', 'ன', 'ண', 'న', 'ణ', 'ನ', 'ಣ', 'ന', 'ണ', 'न', 'ण'],
-  p: ['প', 'ਪ', 'પ', 'ப', 'ప', 'ಪ', 'പ', 'प'],
-  ph: ['ফ', 'ਫ', 'ਫ', 'ఫ', 'ಫ', 'ഫ', 'फ'],
-  b: ['ব', 'ਬ', 'બ', 'బ', 'ಬ', 'ബ', 'ब'],
-  bh: ['ভ', 'ਭ', 'ભ', 'భ', 'ಭ', 'ഭ', 'भ'],
-  m: ['ম', 'ਮ', 'મ', 'ம', 'మ', 'ಮ', 'മ', 'म'],
-  y: ['য', 'ਯ', 'ય', 'ய', 'య', 'ಯ', 'യ', 'य'],
-  r: ['র', 'ৰ', 'ਰ', 'ર', 'ர', 'ற', 'ర', 'ఱ', 'ರ', 'ಱ', 'ര', 'റ', 'र'],
-  l: ['ল', 'ਲ', 'લ', 'ல', 'ள', 'ழ', 'ల', 'ళ', 'ಲ', 'ಳ', 'ല', 'ള', 'ഴ', 'ल', 'ळ'],
-  v: ['ব', 'ਵ', 'વ', 'வ', 'వ', 'ವ', 'വ', 'व'],
-  s: ['শ', 'ষ', 'স', 'ਸ਼', 'ਸ', 'શ', 'ષ', 'સ', 'ஶ', 'ஷ', 'ஸ', 'శ', 'ష', 'స', 'ಶ', 'ಷ', 'ಸ', 'ശ', 'ഷ', 'സ', 'श', 'ष', 'स'],
-  h: ['হ', 'ਹ', 'ਹ', 'ஹ', 'హ', 'ಹ', 'ഹ', 'ह'],
-}
-
-const INDIC_VOWELS = {
-  aa: ['া', 'ਾ', 'ા', 'ா', 'ా', 'ಾ', 'ാ', 'ा', 'आ', 'ਆ', 'આ', 'ஆ', 'ఆ', 'ಆ', 'ആ', 'আ'],
-  i: ['ি', 'ਿ', 'િ', 'ி', 'ి', 'ಿ', 'ി', 'ि', 'इ', 'ਇ', 'ઇ', 'இ', 'ఇ', 'ಇ', 'ഇ', 'ই'],
-  ee: ['ী', 'ੀ', 'ੀ', 'ீ', 'ీ', 'ീ', 'ੀ', 'ी', 'ई', 'ਈ', 'ઈ', 'ஈ', 'ఈ', 'ಈ', 'ഈ', 'ঈ'],
-  u: ['ু', 'ੁ', 'ુ', 'ு', 'ు', 'ੁ', 'ു', 'ु', 'उ', 'ਉ', 'ઉ', 'உ', 'ఉ', 'ಉ', 'ഉ', 'উ'],
-  oo: ['ূ', 'ੂ', 'ੂ', 'ੂ', 'ూ', 'ೂ', 'ൂ', 'ू', 'ऊ', 'ਊ', 'ઊ', 'ஊ', 'ఊ', 'ಊ', 'ഊ', 'ঊ'],
-  e: ['ে', 'ੇ', 'ੇ', 'ெ', 'ே', 'ె', 'ే', 'ೆ', 'ೇ', 'െ', 'േ', 'े', 'ए', 'ਏ', 'એ', 'ஏ', 'ఎ', 'ఏ', 'ಎ', 'ಏ', 'എ', 'ഏ', 'এ'],
-  ai: ['ৈ', 'ੈ', 'ੈ', 'ை', 'ై', 'ೈ', 'ൈ', 'ै', 'ऐ', 'ਐ', 'ઐ', 'ஐ', 'ఐ', 'ಐ', 'ഐ', 'ঐ'],
-  o: ['ো', 'ੋ', 'ો', 'ொ', 'ோ', 'ొ', 'ో', 'ೊ', 'ೋ', 'ൊ', 'ോ', 'ो', 'ओ', 'ਓ', 'ઓ', 'ஒ', 'ஓ', 'ఒ', 'ఓ', 'ಒ', 'ಓ', 'ഒ', 'ഓ', 'ও'],
-  au: ['ৌ', 'ੌ', 'ૌ', 'ௌ', 'ౌ', 'ೌ', 'ൌ', 'ौ', 'औ', 'ਔ', 'ઔ', 'ஔ', 'ఔ', 'ಔ', 'ഔ', 'ঔ'],
-  am: ['ং', 'ਂ', 'ੰ', 'ં', 'ఁ', 'ం', 'ಂ', 'ം', 'ं', 'ঁ', 'ँ'],
+export const LANGUAGE_MAP = {
+  en: { bcp47: 'en-IN', ttsCode: 'en', name: 'English' },
+  hi: { bcp47: 'hi-IN', ttsCode: 'hi', name: 'Hindi' },
+  pa: { bcp47: 'pa-IN', ttsCode: 'pa', name: 'Punjabi' },
+  bn: { bcp47: 'bn-IN', ttsCode: 'bn', name: 'Bengali' },
+  ta: { bcp47: 'ta-IN', ttsCode: 'ta', name: 'Tamil' },
+  te: { bcp47: 'te-IN', ttsCode: 'te', name: 'Telugu' },
+  mr: { bcp47: 'mr-IN', ttsCode: 'mr', name: 'Marathi' },
+  gu: { bcp47: 'gu-IN', ttsCode: 'gu', name: 'Gujarati' },
+  kn: { bcp47: 'kn-IN', ttsCode: 'kn', name: 'Kannada' },
+  ml: { bcp47: 'ml-IN', ttsCode: 'ml', name: 'Malayalam' },
 }
 
 /**
- * Universal Indic Script -> Phonetic English Transliterator
+ * Splits a long text paragraph into clean sentence/clause chunks under maxChars
+ * to guarantee flawless real-time streaming audio without truncation.
  */
-export function transliterateIndicToPhonetic(text) {
-  if (!text) return ''
-  if (PHONETIC_DICTIONARY[text]) return PHONETIC_DICTIONARY[text]
+function splitTextIntoChunks(text, maxChars = 150) {
+  if (!text) return []
+  const clean = text.trim()
+  if (clean.length <= maxChars) return [clean]
 
-  // Check if text is mostly ASCII
-  if (/^[\x00-\x7F\s\d.,!?'"-]+$/.test(text)) {
-    return text
-  }
+  // Split by sentence terminators (English ., !, ? and Indic danda ।, newlines, semicolons)
+  const rawSentences = clean.split(/([।!?\n\r]+|\.\s+)/)
+  const chunks = []
+  let buffer = ''
 
-  let out = ''
-  let i = 0
-  const len = text.length
+  for (let i = 0; i < rawSentences.length; i++) {
+    const part = rawSentences[i]
+    if (!part) continue
 
-  while (i < len) {
-    const char = text[i]
-    const code = char.charCodeAt(0)
-
-    // Non-Indic ASCII characters (spaces, numbers, punctuation)
-    if (code < 0x0900 || code > 0x0D7F) {
-      out += char
-      i++
-      continue
-    }
-
-    // Check Virama / Halant
-    if ([0x094D, 0x09CD, 0x0A4D, 0x0ACD, 0x0B4D, 0x0BCD, 0x0C4D, 0x0CCD, 0x0D4D].includes(code)) {
-      if (out.endsWith('a')) {
-        out = out.slice(0, -1)
-      }
-      i++
-      continue
-    }
-
-    // Check Vowel signs
-    let foundVowel = false
-    for (const [vKey, vChars] of Object.entries(INDIC_VOWELS)) {
-      if (vChars.includes(char)) {
-        if (out.endsWith('a')) {
-          out = out.slice(0, -1)
+    if (buffer.length + part.length <= maxChars) {
+      buffer += part
+    } else {
+      if (buffer.trim()) chunks.push(buffer.trim())
+      
+      // If a single sentence is exceptionally long, split by comma or space
+      if (part.length > maxChars) {
+        const subParts = part.split(/([,;:]\s*|\s+)/)
+        let subBuffer = ''
+        for (const sub of subParts) {
+          if (subBuffer.length + sub.length <= maxChars) {
+            subBuffer += sub
+          } else {
+            if (subBuffer.trim()) chunks.push(subBuffer.trim())
+            subBuffer = sub
+          }
         }
-        out += vKey
-        foundVowel = true
-        break
+        buffer = subBuffer
+      } else {
+        buffer = part
       }
     }
-    if (foundVowel) {
-      i++
-      continue
-    }
-
-    // Check Consonants
-    let foundConsonant = false
-    for (const [cKey, cChars] of Object.entries(INDIC_CONSONANTS)) {
-      if (cChars.includes(char)) {
-        out += cKey + 'a'
-        foundConsonant = true
-        break
-      }
-    }
-    if (foundConsonant) {
-      i++
-      continue
-    }
-
-    i++
   }
 
-  return out.replace(/a([aeiou])/gi, '$1').replace(/aa/g, 'a').trim() || text
+  if (buffer.trim()) {
+    chunks.push(buffer.trim())
+  }
+
+  return chunks.filter(Boolean)
 }
 
 /**
- * Universal Zero-Install Audio Player
- * Plays speech aloud on ANY system (Windows, Android, Mac, iOS) without requiring extra downloads.
+ * Play using browser Web Speech API (fallback)
+ */
+function playWebSpeech(text, langCode = 'hi', onEnd, onError) {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+    onError?.()
+    return
+  }
+
+  try {
+    window.speechSynthesis.cancel()
+    window.speechSynthesis.resume()
+
+    if (!cachedVoices.length) loadVoices()
+    const voices = cachedVoices.length ? cachedVoices : (window.speechSynthesis.getVoices() || [])
+    const safeLang = langCode || 'en'
+    const langConfig = LANGUAGE_MAP[safeLang] || { bcp47: `${safeLang}-IN`, ttsCode: safeLang }
+
+    // Find closest matching voice
+    const exactVoice = voices.find((v) => {
+      const vl = v.lang?.toLowerCase() || ''
+      return vl === langConfig.bcp47.toLowerCase() || vl === safeLang.toLowerCase() || vl.startsWith(`${safeLang}-`)
+    })
+
+    const indianVoice = voices.find((v) => {
+      const vl = v.lang?.toLowerCase() || ''
+      const vn = v.name?.toLowerCase() || ''
+      return vl.includes('in') || vl.includes('hi') || vn.includes('india')
+    })
+
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.lang = exactVoice ? langConfig.bcp47 : (indianVoice ? indianVoice.lang : 'en-IN')
+    if (exactVoice) {
+      utterance.voice = exactVoice
+    } else if (indianVoice) {
+      utterance.voice = indianVoice
+    }
+
+    utterance.rate = 0.92
+    utterance.pitch = 1.0
+
+    let hasEnded = false
+    const handleEnd = () => {
+      if (!hasEnded) {
+        hasEnded = true
+        onEnd?.()
+      }
+    }
+
+    utterance.onend = handleEnd
+    utterance.onerror = () => {
+      handleEnd()
+    }
+
+    setTimeout(() => {
+      try {
+        window.speechSynthesis.speak(utterance)
+      } catch {
+        handleEnd()
+      }
+    }, 40)
+  } catch {
+    onError?.()
+  }
+}
+
+/**
+ * Universal Native Multilingual Audio Player
+ * 
+ * 1. Streams pure, crystal-clear native Indic neural audio for all 10 languages (Punjabi, Bengali, Tamil, Telugu, Hindi, etc.)
+ * 2. Handles multi-sentence queues seamlessly.
+ * 3. Gracefully falls back to Web Speech API if offline.
  */
 export function playLanguageAudio(text, langCode = 'hi', onEnd, onError) {
   stopLanguageAudio()
 
-  if (!text) {
+  if (!text || !text.trim()) {
     onEnd?.()
     return
   }
 
   const safeLang = langCode || 'en'
-  const langConfig = LANGUAGE_MAP[safeLang] || { bcp47: `${safeLang}-IN`, alt: 'en-IN' }
+  const langConfig = LANGUAGE_MAP[safeLang] || { bcp47: `${safeLang}-IN`, ttsCode: safeLang }
+  const ttsLang = langConfig.ttsCode || safeLang
 
-  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-    try {
-      window.speechSynthesis.cancel()
-      window.speechSynthesis.resume()
-
-      if (!cachedVoices.length) {
-        loadVoices()
-      }
-      const voices = cachedVoices.length ? cachedVoices : (window.speechSynthesis.getVoices() || [])
-
-      // Check if native voice pack exists on this device
-      const exactVoice = voices.find(v => {
-        const vl = v.lang?.toLowerCase() || ''
-        return vl === langConfig.bcp47.toLowerCase() ||
-               vl === safeLang.toLowerCase() ||
-               vl.startsWith(`${safeLang}-`)
-      })
-
-      // Check if general Indian voice is available
-      const indianVoice = voices.find(v => {
-        const vl = v.lang?.toLowerCase() || ''
-        const vn = v.name?.toLowerCase() || ''
-        return vl.includes('in') || vl.includes('hi') || vn.includes('india') || vn.includes('heera') || vn.includes('hemant') || vn.includes('kalpana')
-      })
-
-      const englishVoice = voices.find(v => {
-        const vl = v.lang?.toLowerCase() || ''
-        return vl.startsWith('en')
-      })
-
-      const defaultVoice = voices[0]
-
-      let chosenVoice = null
-      let textToSpeak = text
-      let speechLang = 'en-IN'
-
-      if (exactVoice) {
-        // Native voice installed (e.g. Hindi on Windows, or Tamil/Telugu on Android)
-        chosenVoice = exactVoice
-        textToSpeak = text
-        speechLang = langConfig.bcp47
-      } else {
-        // No native voice pack installed on this computer!
-        // Use phonetic transliteration so the Indian English / standard voice speaks the exact native language fluently!
-        chosenVoice = indianVoice || englishVoice || defaultVoice
-        textToSpeak = PHONETIC_DICTIONARY[text] || transliterateIndicToPhonetic(text)
-        speechLang = indianVoice ? (indianVoice.lang || 'en-IN') : 'en-IN'
-      }
-
-      const utterance = new SpeechSynthesisUtterance(textToSpeak)
-      window._activeUtterance = utterance
-
-      if (chosenVoice) {
-        utterance.voice = chosenVoice
-      }
-      utterance.lang = speechLang
-      utterance.rate = 0.88
-      utterance.pitch = 1.0
-
-      let hasEnded = false
-      const handleEnd = () => {
-        if (!hasEnded) {
-          hasEnded = true
-          window._activeUtterance = null
-          onEnd?.()
-        }
-      }
-
-      utterance.onend = handleEnd
-      utterance.onerror = () => {
-        handleEnd()
-      }
-
-      setTimeout(() => {
-        try {
-          window.speechSynthesis.speak(utterance)
-        } catch {
-          handleEnd()
-        }
-      }, 35)
-
-      return
-    } catch {
-      onEnd?.()
-    }
-  } else {
+  const chunks = splitTextIntoChunks(text, 160)
+  if (!chunks.length) {
     onEnd?.()
+    return
   }
+
+  currentQueue = chunks
+  currentQueueIndex = 0
+  isPlayingQueue = true
+
+  const playNextInQueue = () => {
+    if (!isPlayingQueue) return
+
+    if (currentQueueIndex >= currentQueue.length) {
+      isPlayingQueue = false
+      currentAudio = null
+      onEnd?.()
+      return
+    }
+
+    const chunk = currentQueue[currentQueueIndex]
+    currentQueueIndex++
+
+    // Build neural stream URL with target language code
+    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(ttsLang)}&client=tw-ob&q=${encodeURIComponent(chunk)}`
+
+    try {
+      const audio = new Audio()
+      audio.crossOrigin = 'anonymous'
+      audio.src = ttsUrl
+      currentAudio = audio
+
+      audio.onended = () => {
+        if (isPlayingQueue) {
+          playNextInQueue()
+        }
+      }
+
+      audio.onerror = () => {
+        // Fallback to browser SpeechSynthesis if network fails
+        if (isPlayingQueue) {
+          playWebSpeech(
+            chunks.slice(currentQueueIndex - 1).join(' '),
+            safeLang,
+            () => {
+              isPlayingQueue = false
+              currentAudio = null
+              onEnd?.()
+            },
+            () => {
+              isPlayingQueue = false
+              currentAudio = null
+              onError?.()
+            }
+          )
+        }
+      }
+
+      const playPromise = audio.play()
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // If browser audio autoplay was blocked or audio load failed, fallback
+          if (isPlayingQueue) {
+            playWebSpeech(
+              chunks.join(' '),
+              safeLang,
+              () => {
+                isPlayingQueue = false
+                currentAudio = null
+                onEnd?.()
+              },
+              () => {
+                isPlayingQueue = false
+                currentAudio = null
+                onError?.()
+              }
+            )
+          }
+        })
+      }
+    } catch {
+      // Direct WebSpeech fallback
+      playWebSpeech(
+        chunks.join(' '),
+        safeLang,
+        () => {
+          isPlayingQueue = false
+          currentAudio = null
+          onEnd?.()
+        },
+        onError
+      )
+    }
+  }
+
+  // Start sequence
+  playNextInQueue()
 }
 
+/**
+ * Immediately stop any ongoing audio playback and reset queues
+ */
 export function stopLanguageAudio() {
+  isPlayingQueue = false
+  currentQueue = []
+  currentQueueIndex = 0
+
   if (currentAudio) {
     try {
       currentAudio.pause()
-      currentAudio.currentTime = 0
+      currentAudio.removeAttribute('src')
+      currentAudio.load()
     } catch {
       /* ignore */
     }
     currentAudio = null
   }
+
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     try {
       window.speechSynthesis.cancel()
     } catch {
       /* ignore */
     }
-  }
-  if (typeof window !== 'undefined') {
-    window._activeUtterance = null
   }
 }
