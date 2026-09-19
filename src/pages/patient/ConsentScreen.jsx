@@ -20,7 +20,7 @@ export default function ConsentScreen() {
       setSpeaking(false)
       return
     }
-    const textToSpeak = `${t('consentText', '')} ${t('consentDetail', '')}`.trim()
+    const textToSpeak = (t('consentAudioNarrative') || `${t('consentText', '')} ${t('consentSubtitle', '')}`).trim()
     setSpeaking(true)
     playLanguageAudio(
       textToSpeak,
@@ -61,7 +61,7 @@ export default function ConsentScreen() {
           <p className="text-sm font-semibold text-[#174ea6]">2 / 4</p>
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[11px] font-bold text-emerald-800">
             <Lock className="size-3 text-emerald-600" />
-            <span>DPDP Act 2023 & ABDM Compliant</span>
+            <span>{t('dpdpCompliantBadge', 'DPDP Act 2023 & ABDM Compliant')}</span>
           </div>
         </div>
 
@@ -90,16 +90,16 @@ export default function ConsentScreen() {
         <div className="mt-6 rounded-2xl bg-gradient-to-br from-blue-50/70 to-indigo-50/50 p-4 border border-blue-200/80 text-xs text-slate-700 space-y-2">
           <div className="flex items-center gap-2 font-bold text-[#174ea6]">
             <FileCheck2 className="size-4" />
-            <span>Digital Personal Data Protection (DPDP) Act 2023 Notice</span>
+            <span>{t('dpdpNoticeTitle', 'Digital Personal Data Protection (DPDP) Act 2023 Notice')}</span>
           </div>
           <p className="leading-relaxed">
-            • <strong>Purpose Limitation:</strong> Data is collected solely for your attending physician's clinical review.
+            • <strong>{t('dpdpPurposeTitle', 'Purpose Limitation:')}</strong> {t('dpdpPurpose', "Data is collected solely for your attending physician's clinical review.")}
           </p>
           <p className="leading-relaxed">
-            • <strong>Data Principal Rights:</strong> You have the right to view, correct, export, or withdraw consent at any time.
+            • <strong>{t('dpdpRightsTitle', 'Data Principal Rights:')}</strong> {t('dpdpRights', 'You have the right to view, correct, export, or withdraw consent at any time.')}
           </p>
           <p className="leading-relaxed">
-            • <strong>Security:</strong> All clinical data is encrypted in transit and stored locally during the triage session.
+            • <strong>{t('dpdpSecurityTitle', 'Security:')}</strong> {t('dpdpSecurity', 'All clinical data is encrypted in transit and stored locally during the triage session.')}
           </p>
         </div>
 
