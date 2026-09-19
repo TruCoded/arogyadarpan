@@ -7,10 +7,21 @@
 let currentAudio = null
 let cachedVoices = []
 
+function loadVoices() {
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    try {
+      const v = window.speechSynthesis.getVoices()
+      if (v && v.length) cachedVoices = v
+    } catch {
+      /* ignore */
+    }
+  }
+}
+
 if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-  cachedVoices = window.speechSynthesis.getVoices() || []
+  loadVoices()
   window.speechSynthesis.onvoiceschanged = () => {
-    cachedVoices = window.speechSynthesis.getVoices() || []
+    loadVoices()
   }
 }
 
@@ -66,22 +77,24 @@ export function playLanguageAudio(text, langCode = 'hi', onEnd, onError) {
   const safeLang = langCode || 'hi'
   const langConfig = LANGUAGE_MAP[safeLang] || { bcp47: `${safeLang}-IN`, alt: 'hi-IN' }
 
-  // Strategy 1: Web Speech API
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     try {
       window.speechSynthesis.cancel()
       window.speechSynthesis.resume()
 
+      if (!cachedVoices.length) {
+        loadVoices()
+      }
       const voices = cachedVoices.length ? cachedVoices : (window.speechSynthesis.getVoices() || [])
 
       const exactVoice = voices.find(v => 
-        v.lang.toLowerCase() === langConfig.bcp47.toLowerCase() ||
-        v.lang.toLowerCase().startsWith(safeLang.toLowerCase())
+        v.lang?.toLowerCase() === langConfig.bcp47.toLowerCase() ||
+        v.lang?.toLowerCase().startsWith(safeLang.toLowerCase())
       )
       const indianVoice = voices.find(v => 
-        v.lang.toLowerCase() === langConfig.alt.toLowerCase() ||
-        v.lang.toLowerCase().includes('in') ||
-        v.lang.toLowerCase().includes('hi')
+        v.lang?.toLowerCase() === langConfig.alt.toLowerCase() ||
+        v.lang?.toLowerCase().includes('in') ||
+        v.lang?.toLowerCase().includes('hi')
       )
       const defaultVoice = voices[0]
 
@@ -91,14 +104,15 @@ export function playLanguageAudio(text, langCode = 'hi', onEnd, onError) {
       let textToSpeak = text
       if (exactVoice) {
         textToSpeak = text
-      } else if (indianVoice) {
-        textToSpeak = safeLang === 'pa' ? transliterateGurmukhiToHindi(text) : text
-      } else {
-        // Fallback for English-only systems (e.g. standard Windows without Indic voice packs)
+      } else if (indianVoice && safeLang === 'pa') {
+        textToSpeak = transliterateGurmukhiToHindi(text)
+      } else if (!exactVoice && !indianVoice) {
         textToSpeak = PHONETIC_FALLBACKS[safeLang] || text
       }
 
       const utterance = new SpeechSynthesisUtterance(textToSpeak)
+      // Retain utterance on window to prevent Chrome GC from cancelling speech
+      window._activeUtterance = utterance
 
       if (chosenVoice) {
         utterance.voice = chosenVoice
@@ -110,60 +124,35 @@ export function playLanguageAudio(text, langCode = 'hi', onEnd, onError) {
       utterance.rate = 0.90
       utterance.pitch = 1.0
 
-      let hasFinished = false
-      utterance.onend = () => {
-        if (!hasFinished) {
-          hasFinished = true
+      let hasEnded = false
+      const handleEnd = () => {
+        if (!hasEnded) {
+          hasEnded = true
+          window._activeUtterance = null
           onEnd?.()
         }
       }
 
+      utterance.onend = handleEnd
       utterance.onerror = (e) => {
-        if (!hasFinished) {
-          hasFinished = true
-          playOnlineAudio(text, safeLang, onEnd, onError)
-        }
+        handleEnd()
       }
 
-      window.speechSynthesis.speak(utterance)
+      // Small timeout prevents Chrome race condition after cancel()
+      setTimeout(() => {
+        try {
+          window.speechSynthesis.speak(utterance)
+        } catch (e) {
+          handleEnd()
+        }
+      }, 30)
+
       return
     } catch (e) {
-      // Fallback
-    }
-  }
-
-  // Strategy 2: HTML5 Audio Online CDN
-  playOnlineAudio(text, safeLang, onEnd, onError)
-}
-
-function playOnlineAudio(text, safeLang, onEnd, onError) {
-  try {
-    const encodedText = encodeURIComponent(text.slice(0, 200))
-    const cdnUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${safeLang}&q=${encodedText}`
-    const audio = new Audio(cdnUrl)
-    currentAudio = audio
-
-    audio.onended = () => {
-      currentAudio = null
       onEnd?.()
     }
-    audio.onerror = () => {
-      currentAudio = null
-      onEnd?.()
-      onError?.()
-    }
-
-    const playPromise = audio.play()
-    if (playPromise !== undefined) {
-      playPromise.catch(() => {
-        currentAudio = null
-        onEnd?.()
-        onError?.()
-      })
-    }
-  } catch (err) {
+  } else {
     onEnd?.()
-    onError?.()
   }
 }
 
@@ -172,7 +161,7 @@ export function stopLanguageAudio() {
     try {
       currentAudio.pause()
       currentAudio.currentTime = 0
-    } catch (e) {
+    } catch {
       /* ignore */
     }
     currentAudio = null
@@ -180,8 +169,11 @@ export function stopLanguageAudio() {
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     try {
       window.speechSynthesis.cancel()
-    } catch (e) {
+    } catch {
       /* ignore */
     }
+  }
+  if (typeof window !== 'undefined') {
+    window._activeUtterance = null
   }
 }
