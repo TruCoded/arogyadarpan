@@ -50,6 +50,11 @@ export default function DocumentUpload() {
         setScanProgress(progress)
       })
 
+      const enrichedOcrResult = {
+        ...ocrResult,
+        fileName: file.name,
+      }
+
       const newDoc = {
         id: `doc-${Date.now()}`,
         fileName: file.name,
@@ -57,13 +62,13 @@ export default function DocumentUpload() {
         status: 'processed',
         uploadDate: new Date().toISOString().slice(0, 10),
         previewUrl,
-        ocrResult,
+        ocrResult: enrichedOcrResult,
       }
 
       const updated = [newDoc, ...documents]
       setDocuments(updated)
       localStorage.setItem('arogya_documents', JSON.stringify(updated))
-      localStorage.setItem('arogya_ocr_result', JSON.stringify(ocrResult))
+      localStorage.setItem('arogya_ocr_result', JSON.stringify(enrichedOcrResult))
       localStorage.setItem('arogya_last_doc_preview', previewUrl)
 
       setTimeout(() => {

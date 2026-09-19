@@ -259,15 +259,17 @@ export default function DocumentReview() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-[#174ea6] border border-blue-200">
                     <CheckCircle2 className="size-3 text-[#174ea6]" />
-                    {ocrData.documentCategory || 'Prescription'}
+                    {ocrData.documentCategory || 'Uploaded Document'}
                   </span>
-                  <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                    {Math.round((ocrData.confidence || 0.92) * 100)}% Confidence
-                  </span>
+                  {ocrData.confidence > 0 && (
+                    <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                      {Math.round(ocrData.confidence * 100)}% Confidence
+                    </span>
+                  )}
                 </div>
 
                 <h3 className="mt-1 text-base font-bold text-slate-900 font-heading">
-                  {ocrData.doctorInfo?.clinicName || 'Metro Healthcare Clinic & Pathology'}
+                  {ocrData.doctorInfo?.clinicName || ocrData.fileName || 'Uploaded Medical Document'}
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-2 flex-wrap">
                   {ocrData.doctorInfo?.name && (
@@ -281,6 +283,9 @@ export default function DocumentReview() {
                       <Calendar className="size-3" />
                       {ocrData.documentDate}
                     </span>
+                  )}
+                  {!ocrData.doctorInfo?.name && !ocrData.doctorInfo?.clinicName && (
+                    <span className="text-slate-400 italic">No clinic or doctor header on document</span>
                   )}
                 </p>
               </div>
