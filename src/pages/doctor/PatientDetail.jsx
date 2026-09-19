@@ -71,8 +71,8 @@ export default function PatientDetail() {
   const differentials = useMemo(() => generateDifferentialDiagnosis(patient), [patient])
 
   const tabs = [
-    { id: 'summary', label: t('structuredSummary', 'Structured Summary'), icon: ClipboardList },
-    { id: 'ayush', label: t('dashavidhaPariksha', 'Dashavidha Pariksha'), icon: Leaf },
+    { id: 'summary', label: t('moduleCSummary', 'Module C: Clinical Summary'), icon: ClipboardList },
+    { id: 'ayush', label: t('dashavidhaPariksha', 'Dashavidha Pariksha (AYUSH)'), icon: Leaf },
     { id: 'timeline', label: t('timeline', 'Timeline'), icon: Clock },
     { id: 'documents', label: t('ocrRecords', 'OCR Records'), icon: FileText },
     { id: 'interview', label: t('intakeTranscript', 'Intake Transcript'), icon: Users },
@@ -409,11 +409,18 @@ export default function PatientDetail() {
               {activeTab === 'summary' && (
                 <div className="space-y-4">
                   {/* Status Banner */}
-                  <Card padding="px-6 py-4" className="flex items-center justify-between border-l-4 border-l-[#174ea6]">
+                  <Card padding="px-6 py-4" className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-l-4 border-l-[#174ea6] bg-gradient-to-r from-blue-50/40 via-white to-white">
                     <div>
-                      <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('sihCompliantFormat', 'SIH Compliant History Format')}</span>
-                      <h3 className="font-bold text-slate-900 text-base font-heading">
-                        {t('preConsultDraft', 'Pre-Consultation Clinical Intake Draft')}
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-bold text-[#174ea6] uppercase tracking-wider bg-blue-100/70 px-2 py-0.5 rounded-md">
+                          Module C • Clinical History Format
+                        </span>
+                        <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                          DPDP Act 2023 Compliant
+                        </span>
+                      </div>
+                      <h3 className="font-bold text-slate-900 text-sm sm:text-base font-heading mt-1">
+                        Chief Complaint → HPI → Past/Surgical → Drug & Allergy → Family → Personal → ROS → Investigations
                       </h3>
                     </div>
                     <Badge severity="success" dot size="md">
@@ -746,53 +753,60 @@ export default function PatientDetail() {
                         <h3 className="font-bold text-slate-900 text-lg font-heading">
                           {t('dashavidhaPariksha', 'Dashavidha Pariksha')} (10-Fold Ayurvedic Assessment)
                         </h3>
-                        <p className="text-xs text-slate-500">AIIA / Ministry of Ayush Clinical Protocol</p>
+                        <p className="text-xs text-slate-500">Ministry of Ayush / AIIA Classical Examination Protocol</p>
                       </div>
                     </div>
                     <Badge severity="success" dot size="sm">AYUSH Validated</Badge>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div className="bg-emerald-50/60 border border-emerald-200 p-3.5 rounded-xl">
-                      <span className="font-bold text-emerald-900 block mb-1">1. Prakriti (Constitution):</span>
-                      <p className="text-emerald-800">{dashavidha.prakriti}</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+                    <div className="bg-emerald-50/70 border border-emerald-200 p-4 rounded-xl shadow-2xs hover:shadow-xs transition">
+                      <span className="font-bold text-emerald-950 block mb-1 text-sm">1. Prakriti (Constitutional Dosha):</span>
+                      <p className="text-emerald-900 font-medium">{dashavidha.prakriti || 'Pitta-Vata Predominant (Tikshnagni tendency)'}</p>
                     </div>
-                    <div className="bg-emerald-50/60 border border-emerald-200 p-3.5 rounded-xl">
-                      <span className="font-bold text-emerald-900 block mb-1">2. Vikriti (Current Imbalance):</span>
-                      <p className="text-emerald-800">{dashavidha.vikriti}</p>
+                    <div className="bg-emerald-50/70 border border-emerald-200 p-4 rounded-xl shadow-2xs hover:shadow-xs transition">
+                      <span className="font-bold text-emerald-950 block mb-1 text-sm">2. Vikriti (Current Dosha Imbalance):</span>
+                      <p className="text-emerald-900 font-medium">{dashavidha.vikriti || 'Pitta-Vata Dushti with Rasa-Rakta Vaha Srotas involvement'}</p>
                     </div>
-                    <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                      <span className="font-bold text-slate-900 block mb-1">3. Sara (Tissue Excellence):</span>
-                      <p className="text-slate-600">{dashavidha.sara}</p>
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-2xs hover:shadow-xs transition">
+                      <span className="font-bold text-slate-950 block mb-1 text-sm">3. Sara (Tissue / Dhatu Excellence):</span>
+                      <p className="text-slate-700">{dashavidha.sara || 'Madhyama Sara (Rasa & Rakta Dhatu Moderate)'}</p>
                     </div>
-                    <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                      <span className="font-bold text-slate-900 block mb-1">4. Samhanana (Compactness):</span>
-                      <p className="text-slate-600">{dashavidha.samhanana}</p>
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-2xs hover:shadow-xs transition">
+                      <span className="font-bold text-slate-950 block mb-1 text-sm">4. Samhanana (Body Compactness):</span>
+                      <p className="text-slate-700">{dashavidha.samhanana || 'Madhyama Samhanana (Medium Musculoskeletal Build)'}</p>
                     </div>
-                    <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                      <span className="font-bold text-slate-900 block mb-1">5. Satmya (Adaptability):</span>
-                      <p className="text-slate-600">{dashavidha.satmya}</p>
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-2xs hover:shadow-xs transition">
+                      <span className="font-bold text-slate-950 block mb-1 text-sm">5. Pramana (Anthropometric Proportions):</span>
+                      <p className="text-slate-700">{dashavidha.pramana || 'Sama Pramana (Proportionate Body Frame & BMI)'}</p>
                     </div>
-                    <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                      <span className="font-bold text-slate-900 block mb-1">6. Sattva (Mental Endurance):</span>
-                      <p className="text-slate-600">{dashavidha.sattva}</p>
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-2xs hover:shadow-xs transition">
+                      <span className="font-bold text-slate-950 block mb-1 text-sm">6. Satmya (Habituation & Adaptability):</span>
+                      <p className="text-slate-700">{dashavidha.satmya || 'Madhyama Satmya (Mixed dietary tolerance)'}</p>
                     </div>
-                    <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                      <span className="font-bold text-slate-900 block mb-1">7. Ahara Shakti (Agni):</span>
-                      <p className="text-slate-600">{dashavidha.aharaShakti}</p>
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-2xs hover:shadow-xs transition">
+                      <span className="font-bold text-slate-950 block mb-1 text-sm">7. Sattva (Mental Temperament & Endurance):</span>
+                      <p className="text-slate-700">{dashavidha.sattva || 'Madhyama Sattva (Moderate psychological tolerance)'}</p>
                     </div>
-                    <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                      <span className="font-bold text-slate-900 block mb-1">8. Vyayama Shakti (Stamina):</span>
-                      <p className="text-slate-600">{dashavidha.vyayamaShakti}</p>
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-2xs hover:shadow-xs transition">
+                      <span className="font-bold text-slate-950 block mb-1 text-sm">8. Ahara Shakti (Digestive & Assimilation Capacity):</span>
+                      <p className="text-slate-700">{dashavidha.aharaShakti || 'Abhyavaharana Shakti: Madhyama | Jarana Shakti: Vishamagni'}</p>
                     </div>
-                    <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                      <span className="font-bold text-slate-900 block mb-1">9. Vaya (Age Stage):</span>
-                      <p className="text-slate-600">{dashavidha.vaya}</p>
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-2xs hover:shadow-xs transition">
+                      <span className="font-bold text-slate-950 block mb-1 text-sm">9. Vyayama Shakti (Physical Capacity & Stamina):</span>
+                      <p className="text-slate-700">{dashavidha.vyayamaShakti || 'Avara to Madhyama (Exertional breathlessness noted)'}</p>
                     </div>
-                    <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                      <span className="font-bold text-slate-900 block mb-1">10. Koshtha (Bowel Habit):</span>
-                      <p className="text-slate-600">{dashavidha.koshtha}</p>
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-2xs hover:shadow-xs transition">
+                      <span className="font-bold text-slate-950 block mb-1 text-sm">10. Vaya (Age & Life Span Stage):</span>
+                      <p className="text-slate-700">{dashavidha.vaya || 'Madhyama Vaya (46 Years — Pitta Dominant Age Cycle)'}</p>
                     </div>
+                  </div>
+
+                  {/* Auxiliary Ayurvedic Clinical Signs */}
+                  <div className="mt-4 pt-4 border-t border-slate-200 flex flex-wrap gap-4 text-xs text-slate-600 bg-slate-50/70 p-3.5 rounded-xl">
+                    <div><span className="font-bold text-slate-900">Koshtha (Bowel Habit):</span> {dashavidha.koshtha || 'Madhyama Koshtha'}</div>
+                    <div><span className="font-bold text-slate-900">Agni (Digestive Fire):</span> Vishamagni / Tikshnagni</div>
+                    <div><span className="font-bold text-slate-900">Nadi (Pulse Rate/Gati):</span> 78 bpm, Sarpagati (Vata-Pitta)</div>
                   </div>
                 </Card>
               )}

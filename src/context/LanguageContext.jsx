@@ -29,7 +29,11 @@ const LanguageContext = createContext({
 export function LanguageProvider({ children }) {
   const [lang, setLang] = useState(() => {
     try {
-      return localStorage.getItem('arogya_language') || 'en'
+      const stored = localStorage.getItem('arogya_language')
+      if (stored && SUPPORTED_LANGUAGES.some((l) => l.id === stored)) {
+        return stored
+      }
+      return 'en'
     } catch {
       return 'en'
     }
@@ -45,12 +49,12 @@ export function LanguageProvider({ children }) {
   }, [lang])
 
   const setLanguage = (newLang) => {
-    if (SUPPORTED_LANGUAGES.some(l => l.id === newLang)) {
+    if (SUPPORTED_LANGUAGES.some((l) => l.id === newLang)) {
       setLang(newLang)
     }
   }
 
-  const currentLanguageMeta = SUPPORTED_LANGUAGES.find(l => l.id === lang) || SUPPORTED_LANGUAGES[0]
+  const currentLanguageMeta = SUPPORTED_LANGUAGES.find((l) => l.id === lang) || SUPPORTED_LANGUAGES[0]
   const speechLocale = currentLanguageMeta.speechLocale || 'en-IN'
 
   const t = (key, fallback) => {
@@ -61,8 +65,6 @@ export function LanguageProvider({ children }) {
     const coreTranslation = coreUiTranslations[lang]?.[key]
     if (coreTranslation) return coreTranslation
     const translated = translateHelper(key, lang)
-    // translateHelper returns the key itself when no translation exists.
-    // Treat that as a miss so UI copy can use the supplied human fallback.
     return translated === key ? (fallback || key) : translated
   }
 
@@ -88,7 +90,7 @@ export function useLanguage() {
     return {
       lang: 'en',
       setLanguage: () => {},
-      t: (key) => translateHelper(key, 'en'),
+      t: (key, fallback) => fallback || translateHelper(key, 'en'),
       languages: SUPPORTED_LANGUAGES,
       currentLanguageMeta: SUPPORTED_LANGUAGES[0],
       speechLocale: 'en-IN',
