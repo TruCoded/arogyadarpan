@@ -1,17 +1,12 @@
 // ============================================================
-// ArogyaDarpan — Bulletproof Multilingual Audio & TTS Engine
+// ArogyaDarpan — Universal Multilingual Audio & Speech Engine
 // Full native voice support for all 10 Indian languages:
 // hi, pa, bn, ta, te, mr, gu, kn, ml, en
-//
-// Powered by Real Native Neural TTS Streaming with
-// Web Speech API fallback for zero-latency offline playback.
 // ============================================================
 
-let currentAudio = null
-let currentQueue = []
-let currentQueueIndex = 0
-let isPlayingQueue = false
 let cachedVoices = []
+let activeUtterances = []
+let isSpeaking = false
 
 function loadVoices() {
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -32,71 +27,58 @@ if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
 }
 
 export const LANGUAGE_MAP = {
-  en: { bcp47: 'en-IN', ttsCode: 'en', name: 'English' },
-  hi: { bcp47: 'hi-IN', ttsCode: 'hi', name: 'Hindi' },
-  pa: { bcp47: 'pa-IN', ttsCode: 'pa', name: 'Punjabi' },
-  bn: { bcp47: 'bn-IN', ttsCode: 'bn', name: 'Bengali' },
-  ta: { bcp47: 'ta-IN', ttsCode: 'ta', name: 'Tamil' },
-  te: { bcp47: 'te-IN', ttsCode: 'te', name: 'Telugu' },
-  mr: { bcp47: 'mr-IN', ttsCode: 'mr', name: 'Marathi' },
-  gu: { bcp47: 'gu-IN', ttsCode: 'gu', name: 'Gujarati' },
-  kn: { bcp47: 'kn-IN', ttsCode: 'kn', name: 'Kannada' },
-  ml: { bcp47: 'ml-IN', ttsCode: 'ml', name: 'Malayalam' },
+  en: { bcp47: 'en-IN', name: 'English' },
+  hi: { bcp47: 'hi-IN', name: 'Hindi' },
+  pa: { bcp47: 'pa-IN', name: 'Punjabi' },
+  bn: { bcp47: 'bn-IN', name: 'Bengali' },
+  ta: { bcp47: 'ta-IN', name: 'Tamil' },
+  te: { bcp47: 'te-IN', name: 'Telugu' },
+  mr: { bcp47: 'mr-IN', name: 'Marathi' },
+  gu: { bcp47: 'gu-IN', name: 'Gujarati' },
+  kn: { bcp47: 'kn-IN', name: 'Kannada' },
+  ml: { bcp47: 'ml-IN', name: 'Malayalam' },
 }
 
 /**
- * Splits a long text paragraph into clean sentence/clause chunks under maxChars
- * to guarantee flawless real-time streaming audio without truncation.
+ * Splits long text paragraphs into clean sentences to avoid
+ * Chrome Web Speech API 15-second cutoff bug.
  */
-function splitTextIntoChunks(text, maxChars = 150) {
+function splitIntoSentences(text) {
   if (!text) return []
   const clean = text.trim()
-  if (clean.length <= maxChars) return [clean]
-
-  // Split by sentence terminators (English ., !, ? and Indic danda ।, newlines, semicolons)
-  const rawSentences = clean.split(/([।!?\n\r]+|\.\s+)/)
-  const chunks = []
+  const sentences = clean.split(/([।!?\n\r]+|\.\s+)/)
+  const result = []
   let buffer = ''
 
-  for (let i = 0; i < rawSentences.length; i++) {
-    const part = rawSentences[i]
+  for (let i = 0; i < sentences.length; i++) {
+    const part = sentences[i]
     if (!part) continue
 
-    if (buffer.length + part.length <= maxChars) {
-      buffer += part
-    } else {
-      if (buffer.trim()) chunks.push(buffer.trim())
-      
-      // If a single sentence is exceptionally long, split by comma or space
-      if (part.length > maxChars) {
-        const subParts = part.split(/([,;:]\s*|\s+)/)
-        let subBuffer = ''
-        for (const sub of subParts) {
-          if (subBuffer.length + sub.length <= maxChars) {
-            subBuffer += sub
-          } else {
-            if (subBuffer.trim()) chunks.push(subBuffer.trim())
-            subBuffer = sub
-          }
-        }
-        buffer = subBuffer
-      } else {
-        buffer = part
-      }
+    buffer += part
+    if (/[।!?\n\r.]/.test(part) || buffer.length > 120) {
+      if (buffer.trim()) result.push(buffer.trim())
+      buffer = ''
     }
   }
 
   if (buffer.trim()) {
-    chunks.push(buffer.trim())
+    result.push(buffer.trim())
   }
 
-  return chunks.filter(Boolean)
+  return result.filter(Boolean)
 }
 
 /**
- * Play using browser Web Speech API (fallback)
+ * Universal Multilingual Audio & Speech Player
  */
-function playWebSpeech(text, langCode = 'hi', onEnd, onError) {
+export function playLanguageAudio(text, langCode = 'hi', onEnd, onError) {
+  stopLanguageAudio()
+
+  if (!text || !text.trim()) {
+    onEnd?.()
+    return
+  }
+
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
     onError?.()
     return
@@ -108,193 +90,81 @@ function playWebSpeech(text, langCode = 'hi', onEnd, onError) {
 
     if (!cachedVoices.length) loadVoices()
     const voices = cachedVoices.length ? cachedVoices : (window.speechSynthesis.getVoices() || [])
+
     const safeLang = langCode || 'en'
-    const langConfig = LANGUAGE_MAP[safeLang] || { bcp47: `${safeLang}-IN`, ttsCode: safeLang }
+    const langConfig = LANGUAGE_MAP[safeLang] || { bcp47: `${safeLang}-IN` }
+    const bcp47Lower = langConfig.bcp47.toLowerCase()
 
-    // Find closest matching voice
+    // Find voice matching target language (e.g. pa, pa-IN, hi, hi-IN, etc.)
     const exactVoice = voices.find((v) => {
-      const vl = v.lang?.toLowerCase() || ''
-      return vl === langConfig.bcp47.toLowerCase() || vl === safeLang.toLowerCase() || vl.startsWith(`${safeLang}-`)
+      const vl = (v.lang || '').toLowerCase().replace(/_/g, '-')
+      return vl === bcp47Lower || vl.startsWith(`${safeLang}-`) || vl === safeLang
     })
 
-    const indianVoice = voices.find((v) => {
-      const vl = v.lang?.toLowerCase() || ''
-      const vn = v.name?.toLowerCase() || ''
-      return vl.includes('in') || vl.includes('hi') || vn.includes('india')
-    })
-
-    const utterance = new SpeechSynthesisUtterance(text)
-    utterance.lang = exactVoice ? langConfig.bcp47 : (indianVoice ? indianVoice.lang : 'en-IN')
-    if (exactVoice) {
-      utterance.voice = exactVoice
-    } else if (indianVoice) {
-      utterance.voice = indianVoice
+    const chunks = splitIntoSentences(text)
+    if (!chunks.length) {
+      onEnd?.()
+      return
     }
 
-    utterance.rate = 0.92
-    utterance.pitch = 1.0
+    isSpeaking = true
+    let chunkIndex = 0
 
-    let hasEnded = false
-    const handleEnd = () => {
-      if (!hasEnded) {
-        hasEnded = true
+    const speakNextChunk = () => {
+      if (!isSpeaking || chunkIndex >= chunks.length) {
+        isSpeaking = false
         onEnd?.()
+        return
       }
-    }
 
-    utterance.onend = handleEnd
-    utterance.onerror = () => {
-      handleEnd()
-    }
+      const chunkText = chunks[chunkIndex]
+      chunkIndex++
 
-    setTimeout(() => {
+      const utterance = new SpeechSynthesisUtterance(chunkText)
+      utterance.lang = langConfig.bcp47
+      if (exactVoice) {
+        utterance.voice = exactVoice
+      }
+      utterance.rate = 0.92
+      utterance.pitch = 1.0
+
+      utterance.onend = () => {
+        if (isSpeaking) {
+          speakNextChunk()
+        }
+      }
+
+      utterance.onerror = () => {
+        if (isSpeaking) {
+          speakNextChunk()
+        }
+      }
+
+      activeUtterances.push(utterance)
+
       try {
         window.speechSynthesis.speak(utterance)
       } catch {
-        handleEnd()
+        isSpeaking = false
+        onError?.()
       }
+    }
+
+    setTimeout(() => {
+      speakNextChunk()
     }, 40)
   } catch {
+    isSpeaking = false
     onError?.()
   }
 }
 
 /**
- * Universal Native Multilingual Audio Player
- * 
- * 1. Streams pure, crystal-clear native Indic neural audio for all 10 languages (Punjabi, Bengali, Tamil, Telugu, Hindi, etc.)
- * 2. Handles multi-sentence queues seamlessly.
- * 3. Gracefully falls back to Web Speech API if offline.
- */
-export function playLanguageAudio(text, langCode = 'hi', onEnd, onError) {
-  stopLanguageAudio()
-
-  if (!text || !text.trim()) {
-    onEnd?.()
-    return
-  }
-
-  const safeLang = langCode || 'en'
-  const langConfig = LANGUAGE_MAP[safeLang] || { bcp47: `${safeLang}-IN`, ttsCode: safeLang }
-  const ttsLang = langConfig.ttsCode || safeLang
-
-  const chunks = splitTextIntoChunks(text, 160)
-  if (!chunks.length) {
-    onEnd?.()
-    return
-  }
-
-  currentQueue = chunks
-  currentQueueIndex = 0
-  isPlayingQueue = true
-
-  const playNextInQueue = () => {
-    if (!isPlayingQueue) return
-
-    if (currentQueueIndex >= currentQueue.length) {
-      isPlayingQueue = false
-      currentAudio = null
-      onEnd?.()
-      return
-    }
-
-    const chunk = currentQueue[currentQueueIndex]
-    currentQueueIndex++
-
-    // Build neural stream URL with target language code
-    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(ttsLang)}&client=tw-ob&q=${encodeURIComponent(chunk)}`
-
-    try {
-      const audio = new Audio()
-      audio.crossOrigin = 'anonymous'
-      audio.src = ttsUrl
-      currentAudio = audio
-
-      audio.onended = () => {
-        if (isPlayingQueue) {
-          playNextInQueue()
-        }
-      }
-
-      audio.onerror = () => {
-        // Fallback to browser SpeechSynthesis if network fails
-        if (isPlayingQueue) {
-          playWebSpeech(
-            chunks.slice(currentQueueIndex - 1).join(' '),
-            safeLang,
-            () => {
-              isPlayingQueue = false
-              currentAudio = null
-              onEnd?.()
-            },
-            () => {
-              isPlayingQueue = false
-              currentAudio = null
-              onError?.()
-            }
-          )
-        }
-      }
-
-      const playPromise = audio.play()
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          // If browser audio autoplay was blocked or audio load failed, fallback
-          if (isPlayingQueue) {
-            playWebSpeech(
-              chunks.join(' '),
-              safeLang,
-              () => {
-                isPlayingQueue = false
-                currentAudio = null
-                onEnd?.()
-              },
-              () => {
-                isPlayingQueue = false
-                currentAudio = null
-                onError?.()
-              }
-            )
-          }
-        })
-      }
-    } catch {
-      // Direct WebSpeech fallback
-      playWebSpeech(
-        chunks.join(' '),
-        safeLang,
-        () => {
-          isPlayingQueue = false
-          currentAudio = null
-          onEnd?.()
-        },
-        onError
-      )
-    }
-  }
-
-  // Start sequence
-  playNextInQueue()
-}
-
-/**
- * Immediately stop any ongoing audio playback and reset queues
+ * Immediately stops all speech playback
  */
 export function stopLanguageAudio() {
-  isPlayingQueue = false
-  currentQueue = []
-  currentQueueIndex = 0
-
-  if (currentAudio) {
-    try {
-      currentAudio.pause()
-      currentAudio.removeAttribute('src')
-      currentAudio.load()
-    } catch {
-      /* ignore */
-    }
-    currentAudio = null
-  }
+  isSpeaking = false
+  activeUtterances = []
 
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     try {
