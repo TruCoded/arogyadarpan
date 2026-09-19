@@ -32,20 +32,33 @@ export function BionicKioskShell({ children, activeTrack, onTrackChange }) {
       <div className="min-h-screen bg-[#f7f8fa] text-slate-950">
         <header className="sticky top-0 z-40 border-b border-slate-200 bg-white pt-safe">
           <div className="mx-auto flex min-h-16 max-w-6xl items-center gap-3 px-4 py-2.5 sm:px-6">
-            <button type="button" onClick={() => navigate('/patient')} className="flex size-10 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100" aria-label={t('back', 'Back')}>
+            <button
+              type="button"
+              onClick={() => navigate('/patient')}
+              className="flex size-10 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100 cursor-pointer"
+              aria-label={t('back', 'Back')}
+            >
               <ArrowLeft className="size-5" />
             </button>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-extrabold text-[#123b79]">ArogyaDarpan</p>
-              <p className="truncate text-xs text-slate-500">{patient?.name || t('healthInterview', 'Clinical intake')}</p>
+              <p className="truncate text-sm font-extrabold text-[#123b79]">
+                {t('appName', 'ArogyaDarpan')}
+              </p>
+              <p className="truncate text-xs text-slate-500">
+                {patient?.name || t('clinicalIntake', 'Clinical Intake')}
+              </p>
             </div>
             <select
               value={lang}
               onChange={(event) => setLanguage(event.target.value)}
-              className="max-w-36 rounded-full border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-[#174ea6]"
+              className="max-w-36 rounded-full border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-[#174ea6] cursor-pointer"
               aria-label={t('switchLanguage', 'Language')}
             >
-              {languages.map((language) => <option key={language.id} value={language.id}>{language.native}</option>)}
+              {languages.map((language) => (
+                <option key={language.id} value={language.id}>
+                  {language.native}
+                </option>
+              ))}
             </select>
           </div>
         </header>
@@ -55,14 +68,18 @@ export function BionicKioskShell({ children, activeTrack, onTrackChange }) {
             <button
               type="button"
               onClick={() => changeTrack('modern')}
-              className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold ${track === 'modern' ? 'bg-[#174ea6] text-white' : 'text-slate-600'}`}
+              className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold cursor-pointer transition ${
+                track === 'modern' ? 'bg-[#174ea6] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              }`}
             >
-              <Stethoscope className="size-4" /> {t('modernMedicine')}
+              <Stethoscope className="size-4" /> {t('modernMedicine', 'General Medicine')}
             </button>
             <button
               type="button"
               onClick={() => changeTrack('ayush')}
-              className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold ${track === 'ayush' ? 'bg-[#174ea6] text-white' : 'text-slate-600'}`}
+              className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold cursor-pointer transition ${
+                track === 'ayush' ? 'bg-[#174ea6] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              }`}
             >
               <Leaf className="size-4" /> {t('ayush', 'AYUSH')}
             </button>

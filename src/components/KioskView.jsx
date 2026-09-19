@@ -19,7 +19,14 @@ import {
 import heartOrgan from '../assets/organ-heart.png'
 import { BarSparkline, EcgLine, Sparkline } from './kiosk/Telemetry'
 import { BionicKioskShell, useTrack } from './kiosk/BionicKioskShell'
-import { bionicCareTeam, bionicOrgans, bionicVitals } from '../data/bionicData'
+import {
+  bionicCareTeam,
+  bionicOrgans,
+  bionicVitals,
+  getLocalizedOrganName,
+  getLocalizedOrganSummary,
+  getLocalizedStatusLabel
+} from '../data/bionicData'
 import { useLanguage } from '../context/LanguageContext'
 import { getActivePatient, isAuthenticated } from '../services/sessionStore'
 import BionicAuthModal from './kiosk/BionicAuthModal'
@@ -39,7 +46,7 @@ function statusBadge(status) {
 
 function KioskContent() {
   const { track } = useTrack()
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
   const navigate = useNavigate()
   const [activeOrganId, setActiveOrganId] = useState('heart')
   const [currentDateIndex, setCurrentDateIndex] = useState(0)
@@ -73,9 +80,9 @@ function KioskContent() {
           {/* Header Title with Glowing Lime Badge */}
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h1 className="font-heading text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.05] tracking-tight text-slate-900">
-              Overview{' '}
+              {t('overview', 'Overview')}{' '}
               <span className="rounded-xl sm:rounded-2xl bg-lime px-2.5 sm:px-3.5 py-0.5 sm:py-1 text-lime-ink inline-block shadow-xs text-xl sm:text-4xl md:text-5xl">
-                Conditions
+                {t('conditions', 'Conditions')}
               </span>
             </h1>
 
@@ -95,14 +102,14 @@ function KioskContent() {
                 className="border border-amber-400 bg-amber-50/80 text-amber-800 rounded-full px-3.5 py-1 text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-amber-100 transition shadow-xs"
               >
                 <span className="text-sm leading-none">→</span>
-                <span>CHECK-IN REQUIRED</span>
+                <span>{t('checkInRequired', 'CHECK-IN REQUIRED')}</span>
               </button>
             )}
           </div>
           <p className="mt-2 text-xs sm:text-sm font-medium text-slate-500">
-            Active Kiosk Session •{' '}
+            {t('activeKioskSession', 'Active Kiosk Session')} •{' '}
             <span className="font-semibold text-slate-800">
-              {track === 'ayush' ? '🌿 AYUSH — Dashavidha Pariksha' : '🩺 General & Cardiology Medicine'}
+              {track === 'ayush' ? t('ayushTrack', '🌿 AYUSH — Dashavidha Pariksha') : t('modernTrack', '🩺 General & Cardiology Medicine')}
             </span>
           </p>
 
@@ -142,10 +149,12 @@ function KioskContent() {
                 <span className="flex size-7 items-center justify-center rounded-full bg-cobalt-soft text-cobalt">
                   <Heart className="size-3.5 fill-current" />
                 </span>
-                <span className="text-xs font-semibold text-slate-500">Heart Rate</span>
+                <span className="text-xs font-semibold text-slate-500">
+                  {hr.labels?.[lang] || t('heartRate', 'Heart Rate')}
+                </span>
               </div>
               <p className="mt-1 text-2xl font-black text-slate-900 tracking-tight">
-                120 <span className="text-xs font-medium text-slate-500">bpm</span>
+                120 <span className="text-xs font-medium text-slate-500">{t('bpm', 'bpm')}</span>
               </p>
               <EcgLine className="mt-1 text-cobalt" />
             </div>
@@ -153,31 +162,31 @@ function KioskContent() {
             {/* Organ Insight Floating Note */}
             <div className="hidden sm:block glass-card absolute top-4 right-0 max-w-[210px] p-3.5 shadow-glass bg-white/95 z-30 border border-slate-200/90 rounded-2xl">
               <span className={`status-chip ${statusBadge(activeOrgan.status)} uppercase font-bold tracking-wide`}>
-                {activeOrgan.name} • {activeOrgan.hindi}
+                {getLocalizedOrganName(activeOrgan, lang)} • {getLocalizedStatusLabel(activeOrgan.status, lang)}
               </span>
               <p className="mt-1.5 text-[11px] leading-relaxed text-slate-600 font-medium">
-                {activeOrgan.summary}
+                {getLocalizedOrganSummary(activeOrgan, lang)}
               </p>
             </div>
           </div>
         </div>
 
-        {/* ── Bionic Consultation Command Card (Matching User Image 1) ── */}
+        {/* ── Bionic Consultation Command Card ── */}
         <div className="glass-card mt-3 sm:mt-4 p-3 sm:p-5 rounded-2xl sm:rounded-[2rem] bg-white border border-slate-200/90 shadow-glass flex flex-col gap-3 sm:gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1 flex-wrap">
               <span className={`size-3 rounded-full ${isAuthed ? 'bg-emerald animate-ping' : 'bg-emerald-300'}`} />
               <span className="text-xs font-black uppercase tracking-wider text-slate-800">
-                {isAuthed ? `ACTIVE: ${patient.name}` : 'CHECK-IN REQUIRED'}
+                {isAuthed ? `${t('activeColon', 'ACTIVE:')} ${patient.name}` : t('checkInRequired', 'CHECK-IN REQUIRED')}
               </span>
               <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-                {isAuthed ? patient.abhaId : 'ABHA IDENTITY'}
+                {isAuthed ? patient.abhaId : t('abhaIdentity', 'ABHA IDENTITY')}
               </span>
             </div>
             <p className="text-xs text-slate-500 font-medium">
               {isAuthed
-                ? 'Your clinical records and telemetry are synchronized. Ready for AI intake & physician triage.'
-                : 'Please verify your phone number or ABHA ID before starting your clinical session.'
+                ? t('recordsSynced', 'Your clinical records and telemetry are synchronized. Ready for AI intake & physician triage.')
+                : t('checkInHelp', 'Please verify your phone number or ABHA ID before starting your clinical session.')
               }
             </p>
           </div>
@@ -187,7 +196,7 @@ function KioskContent() {
               onClick={handleStartConsultation}
               className="btn-bionic w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-white font-bold text-xs shadow-cobalt flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>{isAuthed ? 'Start AI Clinical Intake' : 'Check In / Register Now'}</span>
+              <span>{isAuthed ? t('startIntake', 'Start AI Clinical Intake') : t('checkInRegisterNow', 'Check In / Register Now')}</span>
               <ArrowRight className="size-4" />
             </button>
 
@@ -196,16 +205,16 @@ function KioskContent() {
               className="glass-pill px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 border border-slate-200 transition cursor-pointer flex items-center gap-1.5"
             >
               <FileText className="size-3.5 text-cobalt" />
-              <span>OCR Scan</span>
+              <span>{t('ocrScan', 'OCR Scan')}</span>
             </button>
           </div>
         </div>
 
-        {/* ── Organ Carousel ("My Body Condition" - Matching User Image 1) ── */}
+        {/* ── Organ Carousel ("My Body Condition") ── */}
         <div className="mt-5">
           <div className="flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-sm sm:text-base font-black text-slate-900">
-              <span className="size-2.5 rounded-full bg-emerald-700" /> My Body Condition
+              <span className="size-2.5 rounded-full bg-emerald-700" /> {t('myBodyCondition', 'My Body Condition')}
             </h2>
             <div className="flex gap-2">
               <button
@@ -236,27 +245,32 @@ function KioskContent() {
           <div className="mt-3 flex gap-3 overflow-x-auto pb-2 scrollbar-none">
             {bionicOrgans.map((organ) => {
               const active = organ.id === activeOrganId
+              const primaryName = getLocalizedOrganName(organ, lang)
+              const secondaryName = lang === 'en' ? organ.hindi : (organ.name || '')
               return (
                 <button
                   key={organ.id}
                   onClick={() => setActiveOrganId(organ.id)}
-                  className={`glass-card tile-lift flex h-32 sm:h-36 w-32 sm:w-38 md:w-42 shrink-0 flex-col justify-between p-3 sm:p-4 text-left cursor-pointer transition rounded-2xl sm:rounded-3xl ${
+                  className={`glass-card tile-lift flex h-36 sm:h-40 w-32 sm:w-38 md:w-42 shrink-0 flex-col justify-between p-3 sm:p-4 text-left cursor-pointer transition rounded-2xl sm:rounded-3xl ${
                     active
                       ? 'border-emerald-600 shadow-cobalt ring-2 ring-emerald-500/30 bg-white'
                       : 'border-slate-200/80 bg-white hover:border-slate-300'
                   }`}
                 >
-                  <div className="flex items-center justify-end w-full">
+                  <div className="flex items-center justify-between w-full">
+                    <span className="text-2xl sm:text-3xl select-none leading-none drop-shadow-xs">
+                      {organ.emoji || '🫀'}
+                    </span>
                     <span className={statusBadge(organ.status)}>
-                      {organ.status.toUpperCase()}
+                      {getLocalizedStatusLabel(organ.status, lang)}
                     </span>
                   </div>
                   <div>
-                    <span className="block text-sm font-black text-slate-900 font-heading leading-tight">
-                      {organ.name}
+                    <span className="block text-sm font-black text-slate-900 font-heading leading-tight truncate">
+                      {primaryName}
                     </span>
-                    <span className="block text-xs font-medium text-slate-500 mt-0.5">
-                      {organ.hindi}
+                    <span className="block text-xs font-medium text-slate-500 mt-0.5 truncate">
+                      {secondaryName}
                     </span>
                   </div>
                 </button>
@@ -266,13 +280,15 @@ function KioskContent() {
         </div>
       </section>
 
-      {/* ── Section 2: Vitals Grid & Care Schedule (Matching User Image 5) ── */}
+      {/* ── Section 2: Vitals Grid & Care Schedule ── */}
       <section className="xl:col-span-5 flex flex-col justify-between gap-4">
         {/* Bento 4 Vitals Grid */}
         <div className="grid grid-cols-2 gap-3.5">
           {/* 1. Blood Status */}
           <div className="glass-card tile-lift p-4 bg-white border border-slate-200/80 rounded-3xl shadow-xs">
-            <span className="text-xs font-bold text-slate-500">{bp.label}</span>
+            <span className="text-xs font-bold text-slate-500">
+              {bp.labels?.[lang] || t('bloodStatus', 'Blood Status')}
+            </span>
             <div className="mt-2 flex items-baseline justify-between">
               <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                 {bp.value}
@@ -285,9 +301,11 @@ function KioskContent() {
           {/* 2. Heart Rate Card */}
           <div className="glass-card tile-lift p-4 bg-white border border-slate-200/80 rounded-3xl shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500">{hr.label}</span>
+              <span className="text-xs font-bold text-slate-500">
+                {hr.labels?.[lang] || t('heartRate', 'Heart Rate')}
+              </span>
               <span className="border border-red-500 text-red-600 bg-transparent font-bold rounded-full px-2 py-0.5 text-[10px]">
-                FLAGGED
+                {getLocalizedStatusLabel('flagged', lang)}
               </span>
             </div>
             <div className="mt-2 flex items-baseline justify-between">
@@ -301,7 +319,9 @@ function KioskContent() {
 
           {/* 3. Blood Count */}
           <div className="glass-card tile-lift p-4 bg-white border border-slate-200/80 rounded-3xl shadow-xs">
-            <span className="text-xs font-bold text-slate-500">{cbc.label}</span>
+            <span className="text-xs font-bold text-slate-500">
+              {cbc.labels?.[lang] || t('bloodCount', 'Blood Count')}
+            </span>
             <div className="mt-2 flex items-baseline justify-between">
               <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                 {cbc.value}
@@ -314,9 +334,11 @@ function KioskContent() {
           {/* 4. Glucose Level Card */}
           <div className="glass-card tile-lift p-4 bg-white border border-slate-200/80 rounded-3xl shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500">{glucose.label}</span>
+              <span className="text-xs font-bold text-slate-500">
+                {glucose.labels?.[lang] || t('glucoseLevel', 'Glucose Level')}
+              </span>
               <span className="border border-amber-500 text-amber-600 bg-transparent font-bold rounded-full px-2 py-0.5 text-[10px]">
-                MONITOR
+                {getLocalizedStatusLabel('monitor', lang)}
               </span>
             </div>
             <div className="mt-2 flex items-baseline justify-between">
@@ -333,10 +355,10 @@ function KioskContent() {
         <div className="glass-card p-5 bg-white border border-slate-200/80 shadow-xs">
           <div className="flex items-center justify-between">
             <h3 className="font-heading text-sm sm:text-base font-bold text-slate-900">
-              Assigned Clinicians & OPD Schedule
+              {t('assignedClinicians', 'Assigned Clinicians & OPD Schedule')}
             </h3>
             <span className="status-chip bg-emerald-soft text-emerald font-bold">
-              OPD Active
+              {t('opdActive', 'OPD Active')}
             </span>
           </div>
 
@@ -366,7 +388,7 @@ function KioskContent() {
             {/* Care Team List */}
             <div className="pt-2">
               <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-                Assigned Clinicians
+                {t('assignedDoctors', 'Assigned Clinicians')}
               </span>
               <ul className="space-y-2.5">
                 {bionicCareTeam.map((doc) => (
@@ -376,7 +398,9 @@ function KioskContent() {
                     </span>
                     <span className="leading-tight">
                       <span className="block text-xs font-bold text-slate-900">{doc.name}</span>
-                      <span className="block text-[10px] text-slate-500">{doc.specialty}</span>
+                      <span className="block text-[10px] text-slate-500">
+                        {doc.specialties?.[lang] || doc.specialty}
+                      </span>
                     </span>
                   </li>
                 ))}
@@ -388,7 +412,7 @@ function KioskContent() {
               onClick={handleStartConsultation}
               className="btn-bionic mt-3 flex w-full items-center justify-between rounded-full px-4 sm:px-5 py-3 sm:py-3.5 text-xs sm:text-sm font-bold text-white shadow-cobalt transition hover:brightness-110 hover:shadow-float active:scale-98 cursor-pointer"
             >
-              <span>{isAuthed ? 'Begin Clinical Consultation' : 'Check In & Consult Now'}</span>
+              <span>{isAuthed ? t('beginConsultation', 'Begin Clinical Consultation') : t('checkInConsultNow', 'Check In & Consult Now')}</span>
               <ArrowRight className="size-4" />
             </button>
           </div>
@@ -397,25 +421,25 @@ function KioskContent() {
         {/* Quick Kiosk Links */}
         <div className="glass-card p-3 bg-white/80 border border-slate-200/70 text-center">
           <p className="text-[11px] text-slate-500">
-            Smart India Hackathon 2026 • AI MediKiosk
+            {t('kioskFooterText', 'Smart India Hackathon 2026 • AI MediKiosk')}
           </p>
           <div className="mt-2 flex justify-center gap-2">
             <Link
               to="/patient/documents"
               className="text-[10px] font-bold text-cobalt hover:underline"
             >
-              OCR Scan
+              {t('ocrScan', 'OCR Scan')}
             </Link>
             <span className="text-slate-300">•</span>
             <Link
               to="/patient/document-review"
               className="text-[10px] font-bold text-cobalt hover:underline"
             >
-              Timeline
+              {t('timeline', 'Timeline')}
             </Link>
             <span className="text-slate-300">•</span>
             <Link to="/doctor" className="text-[10px] font-bold text-cobalt hover:underline">
-              Doctor Console
+              {t('doctorConsole', 'Doctor Console')}
             </Link>
           </div>
         </div>

@@ -12,8 +12,10 @@ import {
   saveRegisteredPatient,
   generatePatientId
 } from '../../services/sessionStore'
+import { useLanguage } from '../../context/LanguageContext'
 
 export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMode = 'login' }) {
+  const { t, lang } = useLanguage()
   const [activeTab, setActiveTab] = useState(initialMode) // 'login' | 'register' | 'demo'
   
   // Login Form
@@ -44,7 +46,7 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
     e?.preventDefault()
     setLoginError('')
     if (!identifier.trim()) {
-      setLoginError('Please enter your Mobile Number or ABHA ID')
+      setLoginError(t('enterMobileOrAbha', 'Please enter your Mobile Number or ABHA ID'))
       return
     }
 
@@ -54,7 +56,7 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
       setIsOtpSent(true)
       setOtpCode(['1', '2', '3', '4']) // Pre-populate simulated OTP for seamless testing
     } else {
-      setLoginError('No existing patient record found with this Mobile/ABHA. Please register or select a demo profile.')
+      setLoginError(t('noPatientFound', 'No existing patient record found with this Mobile/ABHA. Please register or select a demo profile.'))
     }
   }
 
@@ -80,12 +82,12 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
     setRegError('')
 
     if (!regForm.name.trim() || !regForm.phone.trim() || !regForm.age) {
-      setRegError('Please complete all required fields (*)')
+      setRegError(t('completeRequiredFields', 'Please complete all required fields (*)'))
       return
     }
 
     if (regForm.phone.replace(/\D/g, '').length < 10) {
-      setRegError('Please enter a valid 10-digit mobile number')
+      setRegError(t('enterValidPhone', 'Please enter a valid 10-digit mobile number'))
       return
     }
 
@@ -125,10 +127,10 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
             </div>
             <div>
               <h3 className="font-heading font-black text-sm sm:text-lg text-slate-900">
-                Patient Check-In
+                {t('patientCheckIn', 'Patient Check-In')}
               </h3>
               <p className="text-[10px] sm:text-xs text-slate-500 font-medium">
-                ABDM Digital Health Linked
+                {t('abdmLinked', 'ABDM Digital Health Linked')}
               </p>
             </div>
           </div>
@@ -153,8 +155,8 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
               }`}
             >
               <Phone className="size-3 sm:size-3.5 text-cobalt" />
-              <span className="hidden sm:inline">Mobile / ABHA</span>
-              <span className="sm:hidden">Login</span>
+              <span className="hidden sm:inline">{t('mobileOrAbha', 'Mobile / ABHA')}</span>
+              <span className="sm:hidden">{t('login', 'Login')}</span>
             </button>
             <button
               type="button"
@@ -166,8 +168,8 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
               }`}
             >
               <User className="size-3 sm:size-3.5 text-emerald" />
-              <span className="hidden sm:inline">New Patient</span>
-              <span className="sm:hidden">Register</span>
+              <span className="hidden sm:inline">{t('newPatient', 'New Patient')}</span>
+              <span className="sm:hidden">{t('register', 'Register')}</span>
             </button>
             <button
               type="button"
@@ -179,8 +181,8 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
               }`}
             >
               <Sparkles className="size-3 sm:size-3.5 text-amber-500" />
-              <span className="hidden sm:inline">1-Click Demo</span>
-              <span className="sm:hidden">Demo</span>
+              <span className="hidden sm:inline">{t('oneClickDemo', '1-Click Demo')}</span>
+              <span className="sm:hidden">{t('demo', 'Demo')}</span>
             </button>
           </div>
         </div>
@@ -192,7 +194,7 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
               <form onSubmit={handleRequestOtp} className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Registered Mobile Number or ABHA ID
+                    {t('regMobileOrAbha', 'Registered Mobile Number or ABHA ID')}
                   </label>
                   <div className="relative">
                     <input
@@ -219,7 +221,7 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
                   type="submit"
                   className="btn-bionic w-full py-3.5 rounded-full text-white font-bold text-xs shadow-cobalt hover:brightness-110 transition cursor-pointer flex items-center justify-center gap-2"
                 >
-                  <span>Send OTP / Verify Patient Record</span>
+                  <span>{t('sendOtpVerify', 'Send OTP / Verify Patient Record')}</span>
                   <ArrowRight className="size-4" />
                 </button>
               </form>
@@ -227,16 +229,16 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
               <div className="space-y-4">
                 <div className="p-4 rounded-2xl bg-emerald-soft/50 border border-emerald/20 flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] font-bold text-emerald uppercase tracking-wider">Patient Identified</span>
+                    <span className="text-[10px] font-bold text-emerald uppercase tracking-wider">{t('patientIdentified', 'Patient Identified')}</span>
                     <h4 className="font-heading font-black text-slate-900 text-sm">{matchedPatient.name}</h4>
                     <p className="text-xs text-slate-500 font-mono">{matchedPatient.phone} • {matchedPatient.abhaId}</p>
                   </div>
-                  <span className="status-chip bg-emerald-soft text-emerald font-bold">Verified</span>
+                  <span className="status-chip bg-emerald-soft text-emerald font-bold">{t('verified', 'Verified')}</span>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                    Enter 4-Digit Security OTP (Simulated: 1 2 3 4)
+                    {t('enterOtpPrompt', 'Enter 4-Digit Security OTP (Simulated: 1 2 3 4)')}
                   </label>
                   <div className="flex gap-2 justify-center">
                     {otpCode.map((digit, idx) => (
@@ -265,7 +267,7 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
                     onClick={() => setIsOtpSent(false)}
                     className="glass-pill px-4 py-3 text-xs font-bold text-slate-600 border border-slate-200 hover:bg-slate-50 transition cursor-pointer"
                   >
-                    Change Number
+                    {t('changeNumber', 'Change Number')}
                   </button>
                   <button
                     type="button"
@@ -273,7 +275,7 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
                     className="btn-bionic flex-1 py-3.5 rounded-full text-white font-bold text-xs shadow-cobalt hover:brightness-110 transition cursor-pointer flex items-center justify-center gap-2"
                   >
                     <CheckCircle2 className="size-4" />
-                    <span>Confirm & Launch MediKiosk</span>
+                    <span>{t('confirmLaunchKiosk', 'Confirm & Launch MediKiosk')}</span>
                   </button>
                 </div>
               </div>
@@ -286,7 +288,7 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
           <form onSubmit={handleRegister} className="p-4 sm:p-6 space-y-3.5 max-h-[50dvh] overflow-y-auto">
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Full Name *
+                {t('fullName', 'Full Name')} *
               </label>
               <input
                 type="text"
@@ -301,7 +303,7 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
             <div className="grid grid-cols-2 gap-2.5">
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Mobile Number *
+                  {t('mobileNumber', 'Mobile Number')} *
                 </label>
                 <input
                   type="tel"
@@ -316,7 +318,7 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Age (Years) *
+                  {t('ageYears', 'Age (Years)')} *
                 </label>
                 <input
                   type="number"
@@ -334,22 +336,22 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
             <div className="grid grid-cols-2 gap-2.5">
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Gender
+                  {t('gender', 'Gender')}
                 </label>
                 <select
                   value={regForm.gender}
                   onChange={(e) => setRegForm({ ...regForm, gender: e.target.value })}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-xs text-slate-900 focus:bg-white focus:ring-2 focus:ring-cobalt/40 focus:border-cobalt focus:outline-none cursor-pointer"
                 >
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
+                  <option value="Male">{t('male', 'Male')}</option>
+                  <option value="Female">{t('female', 'Female')}</option>
+                  <option value="Other">{t('other', 'Other')}</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Blood Group
+                  {t('bloodGroup', 'Blood Group')}
                 </label>
                 <select
                   value={regForm.bloodGroup}
@@ -364,7 +366,7 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
             </div>
 
             <div className="p-3 rounded-xl bg-cobalt-soft/40 border border-cobalt/20 text-xs text-cobalt flex items-center justify-between">
-              <span className="font-semibold">Auto-generate ABHA ID on submit:</span>
+              <span className="font-semibold">{t('autoGenAbha', 'Auto-generate ABHA ID on submit:')}</span>
               <span className="status-chip bg-white text-cobalt border border-cobalt/20 font-mono">
                 ABHA-AUTO-PROVISION
               </span>
@@ -382,7 +384,7 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
               className="btn-bionic w-full py-3.5 rounded-full text-white font-bold text-xs shadow-cobalt hover:brightness-110 transition cursor-pointer flex items-center justify-center gap-2"
             >
               <CheckCircle2 className="size-4" />
-              <span>Register & Check Into MediKiosk</span>
+              <span>{t('registerAndCheckIn', 'Register & Check Into MediKiosk')}</span>
             </button>
           </form>
         )}
@@ -391,7 +393,7 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
         {activeTab === 'demo' && (
           <div className="p-6 space-y-3">
             <p className="text-xs text-slate-500 font-medium mb-1">
-              Select an existing clinical scenario for immediate live testing:
+              {t('selectProfileDemo', 'Select an existing clinical scenario for immediate live testing:')}
             </p>
 
             <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
@@ -417,7 +419,7 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
                   </div>
 
                   <span className="status-chip bg-cobalt-soft text-cobalt font-bold flex items-center gap-1">
-                    <span>Select</span>
+                    <span>{t('select', 'Select')}</span>
                     <ArrowRight className="size-3" />
                   </span>
                 </div>
@@ -425,7 +427,7 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
             </div>
 
             <div className="pt-2 text-center text-[11px] text-slate-400">
-              Selecting a profile immediately personalizes telemetry, medical records, and intake.
+              {t('profileSelectHint', 'Selecting a profile immediately personalizes telemetry, medical records, and intake.')}
             </div>
           </div>
         )}
